@@ -10,20 +10,30 @@
 #include <optional>
 #include <unordered_map>
 #include <chrono>
+#include "../utility_cw/generator.h"
 
 class CW_GUID
 {
-    CW_GUID();
 
 public:
 
-    static CW_GUID get_next();
+    CW_GUID();
     //TODO: CW_GUID
+
+    bool operator==(const CW_GUID& other) const noexcept;
 
     nlohmann::json to_json() const;
     CW_GUID(nlohmann::json j);
 
 };
+
+generator<CW_GUID> guid_sequence()
+{
+    while (true)
+    {
+        co_yield CW_GUID();
+    }
+}
 
 template<>
 struct std::hash<CW_GUID>

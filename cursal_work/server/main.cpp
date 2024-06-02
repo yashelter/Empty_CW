@@ -12,9 +12,9 @@ int main()
 {
     auto c = boost::async([](){ return 3; });
 
-//    auto d = c.then([](auto x) {
-//
-//        return x.get() * 3;});
+    auto d = c.then([](auto x) {
 
-    std::cout << c.get();
+        return x.get() * 3;});
+
+    std::cout << d.get();
 }

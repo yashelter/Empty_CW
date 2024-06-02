@@ -15,10 +15,15 @@
 #include <boost/thread/future.hpp>
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+class disk_controller;
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
 class memory_controller : public controller_int<tkey, tvalue>
 {
 
 public:
+
+    friend disk_controller<tkey, tvalue, compare, t>;
 
     using collection_t = B_tree<tkey, tvalue, compare, t>;
     using shceme_t = B_tree<std::string, collection_t, std::less<std::string>, t>;
@@ -31,11 +36,15 @@ private:
     using time_point_t = controller_int<tkey, tvalue>::time_point_t;
 
     data_t _root;
+    allocator* _allocator;
+    logger* _logger;
 
     std::mutex _map_mut;
     std::unordered_map<CW_GUID, nlohmann::json> _request_result;
 
 public:
+
+    memory_controller(allocator* = nullptr, logger* = nullptr);
 
     CW_GUID add_pool(std::string pool_name) override;
     CW_GUID remove_pool(std::string pool_name) override;
