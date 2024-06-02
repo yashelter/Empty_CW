@@ -179,6 +179,12 @@ public:
 
     disk_controller(const std::string& path = "database", logger* logger = nullptr);
 
+    disk_controller(const disk_controller& other) =delete;
+    disk_controller(disk_controller&& other) noexcept =default;
+
+    disk_controller& operator=(const disk_controller& other) =delete;
+    disk_controller& operator=(disk_controller&& other) noexcept =default;
+
     CW_GUID add_pool(std::string pool_name) override;
     CW_GUID remove_pool(std::string pool_name) override;
 
@@ -196,7 +202,7 @@ public:
 
     std::optional<nlohmann::json> get(CW_GUID id) override;
 
-    virtual ~disk_controller() =default;
+    virtual ~disk_controller() noexcept;
 
 };
 

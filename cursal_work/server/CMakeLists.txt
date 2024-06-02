@@ -24,7 +24,10 @@ add_executable(
         utility_cw/converters.h
         interfaces/operation.h
         in_disk/tree/b_tree_disk.h
-        main.cpp utility_cw/generator.h)
+        main.cpp
+        utility_cw/generator.h
+        ../structure/student.h
+        ../structure/student.cpp)
 target_link_libraries(
         cw_server
         PUBLIC

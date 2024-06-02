@@ -29,6 +29,7 @@ public:
 
 generator<CW_GUID> guid_sequence()
 {
+    // TODO: generator
     while (true)
     {
         co_yield CW_GUID();
@@ -58,7 +59,7 @@ template<typename f_iter, typename tkey, typename tval>
 concept input_iterator_for_pair = std::input_iterator<f_iter> && std::same_as<typename std::iterator_traits<f_iter>::value_type, std::pair<tkey, tval>>;
 
 template<typename T>
-concept serializable = requires (const T t, std::fstream s, const nlohmann::json j)
+concept serializable = requires (const T t, std::fstream& s, const nlohmann::json j)
                        {
                            {t.serialize(s)};
                            {T::deserialize(s)} -> std::same_as<T>;

@@ -10,7 +10,9 @@ add_executable(
         cw_client
         main.cpp
         client.h
-        client.cpp)
+        client.cpp
+        ../structure/student.h
+        ../structure/student.cpp)
 target_link_libraries(
         cw_client
         PUBLIC
