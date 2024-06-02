@@ -1,0 +1,279 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "allocator/allocator_sorted_list/tests/mp_os_allctr_allctr_srtd_lst_tests.exe"
+		},
+		{
+			"path" : "allocator/allocator_sorted_list/tests/mp_os_allctr_allctr_srtd_lst_tests.pdb"
+		}
+	],
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"_add_executable",
+			"add_executable",
+			"target_link_libraries"
+		],
+		"files" : 
+		[
+			"C:/Users/yashelter/.vcpkg-clion/vcpkg/scripts/buildsystems/vcpkg.cmake",
+			"allocator/allocator_sorted_list/tests/CMakeLists.txt",
+			"cmake-build-debug/_deps/googletest-src/googletest/CMakeLists.txt",
+			"logger/client_logger/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 15,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 598,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 18,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 22,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 26,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 30,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 34,
+				"parent" : 0
+			},
+			{
+				"file" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 161,
+				"parent" : 8
+			},
+			{
+				"file" : 3
+			},
+			{
+				"command" : 2,
+				"file" : 3,
+				"line" : 21,
+				"parent" : 10
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g -std=c++14 -fdiagnostics-color=always"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 4,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/common/./include"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/logger/client_logger/./include"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/logger/logger/./include"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/cmake-build-debug/_deps/json-src/include"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/allocator/allocator/./include"
+				},
+				{
+					"backtrace" : 7,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/allocator/allocator_sorted_list/./include"
+				},
+				{
+					"backtrace" : 3,
+					"isSystem" : true,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/cmake-build-debug/_deps/googletest-src/googletest/include"
+				},
+				{
+					"backtrace" : 3,
+					"isSystem" : true,
+					"path" : "C:/Users/yashelter/Desktop/Lab_2_sem/cmake-build-debug/_deps/googletest-src/googletest"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					3,
+					5
+				],
+				"standard" : "14"
+			},
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 6,
+			"id" : "mp_os_allctr_allctr::@67a2d12acd41ed6b0bc3"
+		},
+		{
+			"backtrace" : 3,
+			"id" : "gtest::@1ea2dfc0605fe3ab2a3f"
+		},
+		{
+			"backtrace" : 3,
+			"id" : "gtest_main::@1ea2dfc0605fe3ab2a3f"
+		},
+		{
+			"backtrace" : 7,
+			"id" : "mp_os_allctr_allctr_srtd_lst::@4702340b8f18f13d4df3"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "mp_os_cmmn::@bfc844598bd03e848b3c"
+		},
+		{
+			"backtrace" : 5,
+			"id" : "mp_os_lggr_clnt_lggr::@1192419ba09c9016d213"
+		},
+		{
+			"backtrace" : 5,
+			"id" : "mp_os_lggr_lggr::@af94273c3084cfb43adb"
+		}
+	],
+	"id" : "mp_os_allctr_allctr_srtd_lst_tests::@9768f5af66b947045b7a",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-g",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "lib\\libgtest_main.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "common\\libmp_os_cmmn.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "logger\\client_logger\\libmp_os_lggr_clnt_lggr.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 6,
+				"fragment" : "allocator\\allocator\\libmp_os_allctr_allctr.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 7,
+				"fragment" : "allocator\\allocator_sorted_list\\libmp_os_allctr_allctr_srtd_lst.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 9,
+				"fragment" : "lib\\libgtest.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "common\\libmp_os_cmmn.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 6,
+				"fragment" : "allocator\\allocator\\libmp_os_allctr_allctr.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 11,
+				"fragment" : "logger\\logger\\libmp_os_lggr_lggr.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "mp_os_allctr_allctr_srtd_lst_tests",
+	"nameOnDisk" : "mp_os_allctr_allctr_srtd_lst_tests.exe",
+	"paths" : 
+	{
+		"build" : "allocator/allocator_sorted_list/tests",
+		"source" : "allocator/allocator_sorted_list/tests"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "allocator/allocator_sorted_list/tests/allocator_sorted_list_tests.cpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "EXECUTABLE"
+}

@@ -1,0 +1,16 @@
+{
+  "log": {
+    "format" : "[%d %t][%s] %m",
+    "trace": {
+      "console" : true,
+      "paths" : [
+        "out.txt",
+        "out.txt",
+        "a.txt"
+      ]
+    },
+    "debug": {
+      "console" : true
+    }
+  }
+}

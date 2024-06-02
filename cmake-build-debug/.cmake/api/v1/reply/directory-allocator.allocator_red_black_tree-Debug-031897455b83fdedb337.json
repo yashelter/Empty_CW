@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "allocator/allocator_red_black_tree",
+		"source" : "allocator/allocator_red_black_tree"
+	}
+}

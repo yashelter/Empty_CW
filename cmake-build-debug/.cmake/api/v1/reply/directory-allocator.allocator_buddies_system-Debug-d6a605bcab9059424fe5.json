@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "allocator/allocator_buddies_system",
+		"source" : "allocator/allocator_buddies_system"
+	}
+}

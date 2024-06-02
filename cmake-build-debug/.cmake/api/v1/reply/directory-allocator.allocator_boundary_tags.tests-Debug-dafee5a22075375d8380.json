@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "allocator/allocator_boundary_tags/tests",
+		"source" : "allocator/allocator_boundary_tags/tests"
+	}
+}
