@@ -7,8 +7,9 @@
 
 #include <utility>
 #include <crow.h>
-#include "../in_memory/controller/memory_controller.h"
-#include "../in_disk//controller/disk_controller.h"
+#include <memory_controller.h>
+#include <disk_controller.h>
+#include <controller_int.h>
 
 template <serializable tkey, serializable tvalue>
 class Server
