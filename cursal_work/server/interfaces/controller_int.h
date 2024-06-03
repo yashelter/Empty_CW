@@ -1,7 +1,3 @@
-//
-// Created by Des Caldnd on 6/2/2024.
-//
-
 #ifndef MP_OS_CONTROLLER_INT_H
 #define MP_OS_CONTROLLER_INT_H
 
