@@ -8,6 +8,7 @@
 #include "../../interfaces/controller_int.h"
 #include "../tree/b_tree.h"
 #include <shared_mutex>
+#include <server_logger.h>
 
 #define BOOST_THREAD_PROVIDES_FUTURE
 #define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
@@ -18,7 +19,7 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 class disk_controller;
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
-class memory_controller : public controller_int<tkey, tvalue>
+class memory_controller : public controller_int<tkey, tvalue>, public logger_guardant
 {
 
 public:
@@ -44,7 +45,9 @@ private:
 
 public:
 
-    memory_controller(allocator* = nullptr, logger* = nullptr);
+    logger *get_logger() const override;
+
+    explicit memory_controller(allocator* = nullptr, logger* = nullptr);
 
     CW_GUID add_pool(std::string pool_name) override;
     CW_GUID remove_pool(std::string pool_name) override;
@@ -66,6 +69,41 @@ public:
     virtual ~memory_controller() =default;
 
 };
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+CW_GUID memory_controller<tkey, tvalue, compare, t>::add_pool(std::string pool_name)
+{
+    CW_GUID id;
+
+    boost::async([this, id, pool_name](){
+        std::lock_guard lock(_root._mut);
+
+        auto [it, res] = _root.insert(std::make_pair(pool_name, shceme_t(std::less<std::string>(), _allocator, _logger)));
+
+        std::string message = res ? "New pool created" : "Pool with same name already exists";
+
+        return message;
+    }).then([this, id](auto fut){
+        nlohmann::json j;
+
+        j["message"] = fut.get();
+
+        std::lock_guard lock(_map_mut);
+
+        _request_result.insert(std::make_pair(id, j));
+    });
+
+    return id;
+}
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+memory_controller<tkey, tvalue, compare, t>::memory_controller(allocator *al, logger *lo) : _logger(lo), _allocator(al), _root(std::less<std::string>(), al, lo) {}
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+logger *memory_controller<tkey, tvalue, compare, t>::get_logger() const
+{
+    return _logger;
+}
 
 
 #endif //MP_OS_MEMORY_CONTROLLER_H

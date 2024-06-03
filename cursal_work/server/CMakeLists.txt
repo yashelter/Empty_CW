@@ -6,6 +6,7 @@ FetchContent_MakeAvailable(json)
 
 find_package(Crow CONFIG REQUIRED)
 find_package(Boost COMPONENTS system thread REQUIRED)
+find_package(crossguid CONFIG REQUIRED)
 
 include_directories (${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
@@ -20,14 +21,13 @@ add_executable(
         interfaces/controller_int.h
         server/server.cpp
         server/server.h
-        utility_cw/converters.cpp
-        utility_cw/converters.h
         interfaces/operation.h
         in_disk/tree/b_tree_disk.h
         main.cpp
         utility_cw/generator.h
         ../structure/student.h
-        ../structure/student.cpp)
+        ../structure/student.cpp
+        interfaces/controller_int.cpp)
 target_link_libraries(
         cw_server
         PUBLIC
@@ -68,6 +68,17 @@ target_link_libraries(
         cw_server
         PUBLIC
         ${BOOST_LIBRARIES})
+target_link_libraries(cw_server
+        PUBLIC
+        crossguid)
+target_link_libraries(
+        serv_test
+        PUBLIC
+        ws2_32)
+target_link_libraries(
+        serv_test
+        PUBLIC
+        wsock32)
 set_target_properties(
         cw_server PROPERTIES
         LANGUAGES CXX

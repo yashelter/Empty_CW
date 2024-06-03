@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(cw_heart)
 
-find_package(Crow CONFIG REQUIRED)
+find_package(httplib CONFIG REQUIRED)
 
 add_executable(
         cw_heart
@@ -11,9 +11,9 @@ add_executable(
         ../launcher/launcher.h
         main.cpp)
 target_link_libraries(
-        cw_heart
+        cw_client
         PUBLIC
-        Crow::Crow)
+        httplib::httplib)
 target_link_libraries(
         cw_heart
         PUBLIC

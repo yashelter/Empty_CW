@@ -1,0 +1,11 @@
+{
+  "log": {
+    "trace": {
+        "path" : "a.txt"
+    },
+    "debug": {
+      "path" : "b.txt",
+      "console" : true
+    }
+  }
+}

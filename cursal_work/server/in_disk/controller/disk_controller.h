@@ -20,16 +20,8 @@
 
 #include <boost/thread/future.hpp>
 
-generator<unsigned int> atomic_index_gen()
-{
-    std::atomic<unsigned int> num;
+generator<unsigned int> atomic_index_gen();
 
-    while(true)
-    {
-        co_yield num.load();
-        ++num;
-    }
-}
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
 class disk_controller : public controller_int<tkey, tvalue>

@@ -7,14 +7,21 @@
 
 #include <boost/thread/future.hpp>
 #include <iostream>
+#include <crossguid/guid.hpp>
+
+#include <thread>
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 int main()
 {
-    auto c = boost::async([](){ return 3; });
+    auto id = xg::newGuid();
+    auto c = boost::async(boost::launch::async, [](){ return xg::newGuid(); });
 
     auto d = c.then([](auto x) {
 
-        return x.get() * 3;});
+        std::cout << x.get() << std::endl; });
 
-    std::cout << d.get();
+    std::this_thread::sleep_for(100ms);
 }

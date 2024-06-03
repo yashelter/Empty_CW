@@ -10,15 +10,15 @@
 #include <optional>
 #include <unordered_map>
 #include <chrono>
+#include <crossguid/guid.hpp>
 #include "../utility_cw/generator.h"
 
-class CW_GUID
+class CW_GUID : public xg::Guid
 {
 
 public:
 
     CW_GUID();
-    //TODO: CW_GUID
 
     bool operator==(const CW_GUID& other) const noexcept;
 
@@ -27,22 +27,16 @@ public:
 
 };
 
-generator<CW_GUID> guid_sequence()
-{
-    // TODO: generator
-    while (true)
-    {
-        co_yield CW_GUID();
-    }
-}
+generator<CW_GUID> guid_sequence();
+
 
 template<>
 struct std::hash<CW_GUID>
 {
-    size_t operator()(const CW_GUID&) const noexcept
+    size_t operator()(const CW_GUID& g) const noexcept
     {
-        // TODO: hash
-        return 1;
+        std::hash<std::string> h;
+        return h(xg::Guid(g));
     }
 };
 
