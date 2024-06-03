@@ -15,8 +15,8 @@
 #include <logger_guardant.h>
 #include <optional>
 
-#include "../../interfaces/controller_int.h"
-#include "../../interfaces/operation.h"
+#include <controller_int.h>
+#include <operation.h>
 
 
 template <serializable tkey, serializable tvalue, compator<tkey> compare = std::less<tkey>, std::size_t t = 5>

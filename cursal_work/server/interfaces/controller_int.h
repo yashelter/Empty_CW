@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <crossguid/guid.hpp>
-#include "../utility_cw/generator.h"
+#include <generator.h>
 
 class CW_GUID : public xg::Guid
 {
@@ -53,13 +53,13 @@ concept serializable = requires (const T t, std::fstream& s, const nlohmann::jso
                        {
                            {t.serialize(s)};
                            {T::deserialize(s)} -> std::same_as<T>;
-                           {t.serializa_size()} -> std::same_as<size_t>;
+                           {t.serialize_size()} -> std::same_as<size_t>;
                            {t.to_json()} -> std::same_as<nlohmann::json>;
                            {T::from_json(j)} -> std::same_as<T>;
                        } && std::copyable<T>;
 
 
-template <serializable tkey, serializable tvalue>
+template <class tkey, class tvalue>
 class controller_int
 {
 public:
@@ -78,7 +78,7 @@ public:
     virtual CW_GUID insert(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) =0; // insert if not exist
     virtual CW_GUID read_value(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) =0;
     virtual CW_GUID read_range(std::string pool_name, std::string scheme_name, std::string collection_name, tkey lower, tkey upper, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) =0;
-    virtual CW_GUID update(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key) =0; // updates if exist
+    virtual CW_GUID update(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) =0; // updates if exist
     virtual CW_GUID remove(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key) =0;
 
     virtual std::optional<nlohmann::json> get(CW_GUID id) =0;
