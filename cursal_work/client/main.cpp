@@ -1,11 +1,10 @@
-//
-// Created by Des Caldnd on 6/2/2024.
-//
-
+#include <iostream>
 #include "client.h"
 
 int main()
 {
+    Client client;
+    client.start_dialog();
 
     return 0;
 }
