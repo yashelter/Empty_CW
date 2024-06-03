@@ -8,3 +8,4 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_subdirectory(client)
 add_subdirectory(server)
+add_subdirectory(heart)

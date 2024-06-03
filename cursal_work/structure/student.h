@@ -19,6 +19,8 @@ public:
     std::string _group;
     unsigned short _course;
 
+    std::vector<std::pair<std::string, unsigned short>> _subjects;
+
     static std::mutex file_mut;
     static constexpr std::string path = "strings.str";
 
