@@ -18,16 +18,14 @@ public:
     std::vector<std::pair<std::string, unsigned short>> _subjects;
 
     static std::mutex file_mut;
-    static constexpr std::string path = "strings.str";
+    constexpr static std::string path = "strings.str";
 
     void serialize(std::fstream& stream) const;
-
     size_t serialize_size() const noexcept;
 
     static student deserialize(std::fstream& stream);
 
     nlohmann::json to_json() const;
-
     static student from_json(const nlohmann::json& json);
 
     std::string to_string() const;

@@ -10,6 +10,8 @@
 #include <thread>
 #include <future>
 
+using json = nlohmann::json;
+
 class Client
 {
 public:
@@ -19,8 +21,6 @@ public:
     };
     ResponseStrategy response_strategy;
 private:
-    using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
-
     mutable httplib::Client _client;
 
     static const std::regex _add_pool_reg;
@@ -51,6 +51,7 @@ private:
      */
 private:
     bool is_name_correct(const std::string& name);
+    student read_student(std::istream& cin, std::ostream& cout);
 
     std::optional<std::string> add_pool(const std::string& pool_name);
     std::optional<std::string> remove_pool(const std::string& pool_name);
@@ -61,17 +62,35 @@ private:
     std::optional<std::string> add_collection(const std::string &pool_name, const std::string &scheme_name, const std::string &collection_name);
     std::optional<std::string> remove_collection(const std::string &pool_name, const std::string &scheme_name, const std::string &collection_name);
 
+    std::optional<std::string> insert(const std::string& pool_name,
+                                          const std::string& scheme_name,
+                                          const std::string& collection_name,
+                                          const json &student);
+
+    std::optional<std::string> update(const std::string& pool_name,
+                                      const std::string& scheme_name,
+                                      const std::string& collection_name,
+                                      const json &student);
+
+    std::optional<std::string> remove(const std::string& pool_name,
+                                      const std::string& scheme_name,
+                                      const std::string& collection_name,
+                                      const std::string &student);
+
     std::optional<std::string> read_value(const std::string& pool_name,
                                           const std::string& scheme_name,
                                           const std::string& collection_name,
+                                          const std::string& key,
                                           bool need_persist = false,
-                                          time_point_t time_point = std::chrono::utc_clock::now());
+                                          std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 
     std::optional<std::string> read_range(const std::string& pool_name,
                                           const std::string& scheme_name,
                                           const std::string& collection_name,
+                                          const std::string& key1,
+                                          const std::string& key2,
                                           bool need_persist = false,
-                                          time_point_t time_point = std::chrono::utc_clock::now());
+                                          std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 
     const std::string invalid_param = "Got invalid parameters, please check them to rules";
     std::string get_hint();

@@ -1,6 +1,7 @@
 #include "client.h"
 
 
+
 const std::regex Client::_exit_reg("exit", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_mode_reg("change_mode", std::regex_constants::icase | std::regex_constants::optimize);
 
@@ -24,13 +25,27 @@ Client::Client(const std::string& destination) : _client(destination)
 {
 
 }
+std::optional<std::string> Client::get(const std::string &guid)
+{
+    httplib::Params params;
+    params.emplace("GUID", guid);
+
+    auto res = _client.Get("/get", params, httplib::Headers());
+
+    if (res && res->status == 200)
+    {
+        return std::optional<std::string> {res->body};
+    }
+
+    return {};
+}
 
 std::optional<std::string> Client::add_pool(const std::string &pool_name)
 {
     httplib::Params params;
     params.emplace("pool_name", pool_name);
 
-    auto res = _client.Post("/add_pool", params);
+    auto res = _client.Get("/add_pool", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -40,27 +55,13 @@ std::optional<std::string> Client::add_pool(const std::string &pool_name)
     return {};
 }
 
-std::optional<std::string> Client::get(const std::string &guid)
-{
-    httplib::Params params;
-    params.emplace("CW_GUID", guid);
-
-    auto res = _client.Post("/get", params);
-
-    if (res && res->status == 200)
-    {
-        return std::optional<std::string> {res->body};
-    }
-
-    return {};
-}
 
 std::optional<std::string> Client::remove_pool(const std::string &pool_name)
 {
     httplib::Params params;
     params.emplace("pool_name", pool_name);
 
-    auto res = _client.Post("/remove_pool", params);
+    auto res = _client.Get("/remove_pool", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -76,7 +77,7 @@ std::optional<std::string> Client::add_scheme(const std::string &pool_name, cons
     params.emplace("pool_name", pool_name);
     params.emplace("scheme_name", scheme_name);
 
-    auto res = _client.Post("/add_scheme", params);
+    auto res = _client.Get("/add_scheme", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -93,7 +94,7 @@ std::optional<std::string> Client::remove_scheme(const std::string &pool_name, c
     params.emplace("pool_name", pool_name);
     params.emplace("scheme_name", scheme_name);
 
-    auto res = _client.Post("/remove_scheme", params);
+    auto res = _client.Get("/remove_scheme", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -112,7 +113,7 @@ std::optional<std::string> Client::add_collection(const std::string &pool_name,
     params.emplace("scheme_name", scheme_name);
     params.emplace("collection_name", collection_name);
 
-    auto res = _client.Post("/add_collection", params);
+    auto res = _client.Get("/add_collection", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -131,7 +132,7 @@ std::optional<std::string> Client::remove_collection(const std::string &pool_nam
     params.emplace("scheme_name", scheme_name);
     params.emplace("collection_name", collection_name);
 
-    auto res = _client.Post("/remove_collection", params);
+    auto res = _client.Get("/remove_collection", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -141,23 +142,91 @@ std::optional<std::string> Client::remove_collection(const std::string &pool_nam
     return {};
 }
 
-// TODO: 7-10
+std::optional<std::string>
+Client::insert(const std::string &pool_name,
+               const std::string &scheme_name,
+               const std::string &collection_name,
+               const json &student)
+{
+    httplib::Params params;
+
+    params.emplace("pool_name", pool_name);
+    params.emplace("scheme_name", scheme_name);
+    params.emplace("collection_name", collection_name);
+    params.emplace("data", to_string(student));
+
+    auto res = _client.Get("/insert", params, httplib::Headers());
+
+    if (res && res->status == 200)
+    {
+        return std::optional<std::string> {res->body};
+    }
+    return {};
+}
+
+std::optional<std::string>
+Client::remove(const std::string &pool_name,
+               const std::string &scheme_name,
+               const std::string &collection_name,
+               const std::string &student)
+{
+    httplib::Params params;
+
+    params.emplace("pool_name", pool_name);
+    params.emplace("scheme_name", scheme_name);
+    params.emplace("collection_name", collection_name);
+    params.emplace("data", student);
+
+    auto res = _client.Get("/remove", params, httplib::Headers());
+
+    if (res && res->status == 200)
+    {
+        return std::optional<std::string> {res->body};
+    }
+    return {};
+}
+
+
+std::optional<std::string>
+Client::update(const std::string &pool_name,
+               const std::string &scheme_name,
+               const std::string &collection_name,
+               const json &student)
+{
+    httplib::Params params;
+
+    params.emplace("pool_name", pool_name);
+    params.emplace("scheme_name", scheme_name);
+    params.emplace("collection_name", collection_name);
+    params.emplace("data", to_string(student));
+
+    auto res = _client.Get("/update", params, httplib::Headers());
+
+    if (res && res->status == 200)
+    {
+        return std::optional<std::string> {res->body};
+    }
+    return {};
+}
+
 
 std::optional<std::string> Client::read_value(const std::string &pool_name,
                                               const std::string &scheme_name,
                                               const std::string &collection_name,
+                                              const std::string &key,
                                               bool need_persist,
-                                              Client::time_point_t time_point)
+                                              std::time_t time)
 
 {
     httplib::Params params;
     params.emplace("pool_name", pool_name);
     params.emplace("scheme_name", scheme_name);
     params.emplace("collection_name", collection_name);
-    params.emplace("need_persist", std::to_string(need_persist)); // ?
-    //TODO: params.emplace("time_point", time_point); // ?
+    params.emplace("key", key);
+    params.emplace("need_persist", std::to_string(need_persist));
+    params.emplace("time_point", std::to_string(time));
 
-    auto res = _client.Post("/read_value", params);
+    auto res = _client.Get("/read_value", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -170,18 +239,22 @@ std::optional<std::string> Client::read_value(const std::string &pool_name,
 std::optional<std::string> Client::read_range(const std::string &pool_name,
                                               const std::string &scheme_name,
                                               const std::string &collection_name,
+                                              const std::string &up,
+                                              const std::string &down,
                                               bool need_persist,
-                                              Client::time_point_t time_point)
+                                              std::time_t time)
 
 {
     httplib::Params params;
     params.emplace("pool_name", pool_name);
     params.emplace("scheme_name", scheme_name);
     params.emplace("collection_name", collection_name);
-    params.emplace("need_persist", std::to_string(need_persist)); // ?
-    //TODO: params.emplace("time_point", time_point); // ?
+    params.emplace("lower", up);
+    params.emplace("upper", down);
+    params.emplace("need_persist", std::to_string(need_persist));
+    params.emplace("time_point", std::to_string(time));
 
-    auto res = _client.Post("/read_range", params);
+    auto res = _client.Get("/read_range", params, httplib::Headers());
 
     if (res && res->status == 200)
     {
@@ -220,6 +293,7 @@ std::string Client::get_answer_from_server(const std::string& guid)
         });
         return future.get();
     }
+    return "";
 }
 
 std::string Client::get_hint()
@@ -366,4 +440,12 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
     }
 }
 
+student Client::read_student(std::istream &cin, std::ostream &cout)
+{
+    student stud;
+    cin >> stud._name;
+    cin >> stud._surname;
+    cin >> stud._group;
+    return stud;
+}
 

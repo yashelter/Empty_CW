@@ -1,7 +1,3 @@
-//
-// Created by Des Caldnd on 6/2/2024.
-//
-
 #include "server.h"
 
 using json = nlohmann::json;
@@ -13,7 +9,8 @@ template <
 Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t port)
 		: _controller(controller)
 {
-	CROW_ROUTE(app, "/add_pool") ([&](const crow::request &req) {
+	CROW_ROUTE(app, "/add_pool") ([&](const crow::request &req)
+    {
 		auto pool_name = req.url_params.get("pool_name");
 		_controller->add_pool(pool_name);
 
