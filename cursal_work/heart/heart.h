@@ -5,6 +5,7 @@
 #ifndef MP_OS_HEART_H
 #define MP_OS_HEART_H
 
+#include "../client/client.h"
 
 class heart
 {

@@ -98,8 +98,10 @@ private:
     std::string get_hint();
 
     std::optional<std::string> get(const std::string &guid);
-    std::string get_answer_from_server(const std::string& guid);
-    std::string get_new_student(std::istream& cin, std::ostream& cout);
+    void get_answer_from_server(std::istream& cin, std::ostream& cout, const std::string& guid,
+                                void (*function)(std::ostream&, std::string&));
+    static std::string get_new_student(std::istream& cin, std::ostream& cout);
+    static void simple_parse(std::ostream& cout, std::string& line);
 
 public:
 

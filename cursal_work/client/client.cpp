@@ -265,7 +265,8 @@ std::optional<std::string> Client::read_range(const std::string &pool_name,
 }
 
 
-std::string Client::get_answer_from_server(const std::string& guid)
+void Client::get_answer_from_server(std::istream& cin, std::ostream& cout, const std::string& guid,
+                                    void (*function)(std::ostream&, std::string&))
 {
     if (response_strategy == ResponseStrategy::Waiting)
     {
@@ -273,14 +274,14 @@ std::string Client::get_answer_from_server(const std::string& guid)
 
         while (!answer.has_value())
         {
+            cout << "Waiting for response...\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             answer = get(guid);
         }
-        return answer.value();
-        // TODO: parse answer
+        function(cout, answer.value());
     } else if (response_strategy == ResponseStrategy::Async)
     {
-        auto future = std::async(std::launch::async, [this, guid]()
+        auto future = std::async(std::launch::async, [this, guid, &cout, function]()
         {
             std::optional<std::string> answer;
             while (!answer.has_value())
@@ -288,13 +289,13 @@ std::string Client::get_answer_from_server(const std::string& guid)
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 answer = get(guid);
             }
-            return answer.value();
-            // TODO: parse answer
+            function(cout, answer.value());
         });
-        return future.get();
+
     }
-    return "";
+
 }
+
 
 std::string Client::get_hint()
 {
@@ -306,8 +307,6 @@ std::string Client::get_hint()
     return str;
 }
 
-// /read_value - pool_name scheme_name collection_name need_persist:bool (time_point)
-// body: json(key:string)
 void Client::start_dialog(std::istream &cin, std::ostream &cout)
 {
     std::string str = "Successfully started client\nAwaiting your commands\n\n";
@@ -331,7 +330,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                cout << "Failed while sent message\n";
                continue;
            }
-           cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+           get_answer_from_server(cin, cout, response.value(),&simple_parse);
            // TODO: parse answer
         }
         else if (std::regex_match(command, _remove_pool_reg))
@@ -348,7 +347,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
             // TODO: parse answer
         }
         else if (std::regex_match(command, _add_scheme_reg))
@@ -366,7 +365,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
             // TODO: parse answer
         }
         else if (std::regex_match(command, _remove_scheme_reg))
@@ -384,7 +383,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
             // TODO: parse answer
         }
         else if (std::regex_match(command, _add_collection_reg))
@@ -402,7 +401,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
             // TODO: parse answer
         }
         else if (std::regex_match(command, _remove_collection_reg))
@@ -420,7 +419,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
             // TODO: parse answer
         }
         else if (std::regex_match(command, _read_value_reg))
@@ -459,7 +458,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
             // TODO: parse answer
         }
         // TODO: read value, read range, update
@@ -571,4 +570,9 @@ std::time_t Client::input_time(const std::string& line)
 
     std::time_t time = std::mktime(&t);
     return time;
+}
+
+void Client::simple_parse(std::ostream &cout, std::string &line)
+{
+    cout << line;
 }
