@@ -1,3 +1,7 @@
+//
+// Created by Des Caldnd on 6/2/2024.
+//
+
 #include "server.h"
 
 using json = nlohmann::json;
@@ -9,8 +13,11 @@ template <
 Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t port)
 		: _controller(controller)
 {
-	CROW_ROUTE(app, "/add_pool") ([&](const crow::request &req)
-    {
+	CROW_ROUTE(app, "/heart") ([&](const crow::request& req) {
+		return crow::response(200, "OK");
+	});
+
+	CROW_ROUTE(app, "/add_pool") ([&](const crow::request &req) {
 		auto pool_name = req.url_params.get("pool_name");
 		CW_GUID result = _controller->add_pool(pool_name);
 
@@ -155,12 +162,15 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 		json jsn = json(body);
 		CW_GUID id = jsn;
 
-//		std::optional<nlohmann::json> result = _controller->get(id);
+		std::optional<nlohmann::json> result = _controller->get(id);
 
-	if (result) 
-{
+		if (result) {
 			return crow::response(200, result.value().dump());
 		} else {
 			return crow::response(404, "Not Found");
-		}	});
+		}
+	});
+
+	app.port(port).multithreaded();
+	app.run();
 }
