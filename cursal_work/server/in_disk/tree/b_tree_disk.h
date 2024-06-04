@@ -133,6 +133,8 @@ public:
      */
     bool erase(const tkey& key);
 
+    bool is_valid() const noexcept;
+
 private:
 
 };

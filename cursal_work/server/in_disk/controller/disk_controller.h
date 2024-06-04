@@ -195,7 +195,7 @@ private:
 
 public:
 
-    explicit disk_controller(const std::string& path = "database", logger* logger = nullptr);
+    explicit disk_controller(const std::string& path = "database", compare comparer = compare(), logger* logger = nullptr);
 
     disk_controller(const disk_controller& other) =delete;
     disk_controller(disk_controller&& other) noexcept =default;
@@ -227,6 +227,188 @@ public:
 };
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+CW_GUID disk_controller<tkey, tvalue, compare, t>::insert(std::string pool_name, std::string scheme_name,
+                                                          std::string collection_name, tkey key, tvalue value)
+{
+    CW_GUID id;
+
+    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name](){
+        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+
+        bool res = std::filesystem::exists(_root / pool_name);
+
+        if (!res)
+        {
+            return std::string("Pool does not exist");
+        }
+
+        lock_helper plock(_opened_dirs_files, false, pool_name, _opened_mutex, _opened_cond_var);
+
+        res = std::filesystem::exists(_root / pool_name / scheme_name);
+
+        if (!res)
+        {
+            return std::string("Scheme does not exist");
+        }
+
+        lock_helper slock(_opened_dirs_files, false, pool_name + '/' + scheme_name, _opened_mutex, _opened_cond_var);
+
+
+        res = std::filesystem::exists(_root / pool_name / scheme_name / (collection_name + ".dat"));
+
+        if (!res)
+            return std::string("Collection does not exist");
+
+        lock_helper clock(_opened_dirs_files, true, pool_name + '/' + scheme_name + '/' + collection_name, _opened_mutex, _opened_cond_var);
+
+        B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+
+        if (!tree.is_valid())
+        {
+            return std::string("Collection was not opened");
+
+
+        }
+        _history.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<in_disk_operation>(new in_disk_collection_remove_operation(ind, pool_name, scheme_name, collection_name))));
+        return std::string("Collection was successfully removed");
+
+    }).then([this, id](auto fut){
+        nlohmann::json res;
+        res["message"] = fut.get();
+
+        std::lock_guard lock(_map_mut);
+
+        _request_result.insert(std::make_pair(id, res));
+    });
+
+    return id;
+}
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+CW_GUID disk_controller<tkey, tvalue, compare, t>::remove_collection(std::string pool_name, std::string scheme_name,
+                                                                     std::string collection_name)
+{
+    CW_GUID id;
+
+    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name](){
+        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+
+        bool res = std::filesystem::exists(_root / pool_name);
+
+        if (!res)
+        {
+            return std::string("Pool does not exist");
+        }
+
+        lock_helper plock(_opened_dirs_files, false, pool_name, _opened_mutex, _opened_cond_var);
+
+        res = std::filesystem::exists(_root / pool_name / scheme_name);
+
+        if (!res)
+        {
+            return std::string("Scheme does not exist");
+        }
+
+        lock_helper slock(_opened_dirs_files, true, pool_name + '/' + scheme_name, _opened_mutex, _opened_cond_var);
+
+
+        res = std::filesystem::exists(_root / pool_name / scheme_name / (collection_name + ".dat"));
+
+
+        if (res)
+        {
+            std::lock_guard hlock(_history_mut);
+
+            size_t length = 0;
+
+            unsigned int ind = _index_gen();
+
+            remove_dir(_root / pool_name / scheme_name / (collection_name + ".dat"), _bucket, ind);
+
+            _history.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<in_disk_operation>(new in_disk_collection_remove_operation(ind, pool_name, scheme_name, collection_name))));
+            return std::string("Collection was successfully removed");
+        } else
+        {
+            return std::string("Collection was not removed");
+        }
+
+    }).then([this, id](auto fut){
+        nlohmann::json res;
+        res["message"] = fut.get();
+
+        std::lock_guard lock(_map_mut);
+
+        _request_result.insert(std::make_pair(id, res));
+    });
+
+    return id;
+}
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+CW_GUID disk_controller<tkey, tvalue, compare, t>::add_collection(std::string pool_name, std::string scheme_name,
+                                                                  std::string collection_name)
+{
+    CW_GUID id;
+
+    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name](){
+        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+
+        bool res = std::filesystem::exists(_root / pool_name);
+
+        if (!res)
+        {
+            return std::string("Pool does not exist");
+        }
+
+        lock_helper plock(_opened_dirs_files, false, pool_name, _opened_mutex, _opened_cond_var);
+
+        res = std::filesystem::exists(_root / pool_name / scheme_name);
+
+        if (!res)
+        {
+            return std::string("Scheme does not exist");
+        }
+
+        lock_helper slock(_opened_dirs_files, true, pool_name + '/' + scheme_name, _opened_mutex, _opened_cond_var);
+
+
+
+        std::fstream file;
+
+        if (!std::filesystem::exists(_root / pool_name / scheme_name / (collection_name + ".dat")))
+            file.open(_root / pool_name / scheme_name / (collection_name + ".dat"), std::ios_base::binary);
+
+        res = file.is_open();
+
+        if (res)
+        {
+            std::lock_guard hlock(_history_mut);
+
+            size_t length = 0;
+
+            file.write(reinterpret_cast<char*>(length), sizeof(size_t));
+            file.write(reinterpret_cast<char*>(length), sizeof(size_t));
+
+            _history.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<in_disk_operation>(new in_disk_collection_add_operation(_index_gen(), pool_name, scheme_name, collection_name))));
+            return std::string("Collection was successfully created");
+        } else
+        {
+            return std::string("Collection was not created");
+        }
+
+    }).then([this, id](auto fut){
+        nlohmann::json res;
+        res["message"] = fut.get();
+
+        std::lock_guard lock(_map_mut);
+
+        _request_result.insert(std::make_pair(id, res));
+    });
+
+    return id;
+}
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
 CW_GUID disk_controller<tkey, tvalue, compare, t>::remove_scheme(std::string pool_name, std::string scheme_name)
 {
     CW_GUID id;
@@ -254,10 +436,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::remove_scheme(std::string poo
             remove_dir(_root / pool_name / scheme_name, _bucket, ind);
 
             _history.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<in_disk_operation>(new in_disk_scheme_remove_operation(ind, pool_name, scheme_name))));
-            return std::string("Scheme was successfully created");
+            return std::string("Scheme was successfully removed");
         } else
         {
-            return std::string("Scheme was not created");
+            return std::string("Scheme was not removed");
         }
 
     }).then([this, id](auto fut){
