@@ -12,6 +12,7 @@ find_package(crossguid CONFIG REQUIRED)
 
 add_library(
         cw_memory
+        SHARED
         controller/memory_controller.h
         controller/memory_controller.cpp
         tree/b_tree.h)
