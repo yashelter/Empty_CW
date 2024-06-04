@@ -5,6 +5,7 @@
 #ifndef MP_OS_SERVER_H
 #define MP_OS_SERVER_H
 
+#include "../../structure/student.h"
 #include <utility>
 #include <crow.h>
 #include <memory_controller.h>
