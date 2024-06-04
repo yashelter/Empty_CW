@@ -159,8 +159,95 @@ public:
         return wide.c_str();
     }
 
-
 };//class process
 #endif //win32
+
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+
+class process
+{
+public:
+
+	pid_t launchProcess(const std::string& command, char* arg[])
+	{
+		pid_t pid = fork();
+
+		if (pid == 0) // Child process
+		{
+			execvp(command.c_str(), arg); // запуск
+
+			std::cerr << "Failed to execute command: " << command << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		else if (pid > 0)  // Parent process
+		{
+			return pid;
+		}
+		else // Fork failed
+		{
+			std::cerr << "Failed to fork process" << std::endl;
+			return -1;
+		}
+	}
+
+	bool checkIfProcessIsActive(pid_t pid)
+	{
+		int status;
+		if (waitpid(pid, &status, WNOHANG) == 0)
+		{
+			return true; // Process is still running
+		}
+		else
+		{
+			if (WIFEXITED(status)) // has exited
+			{
+				std::cout << "Process " << pid << " exited with code " << WEXITSTATUS(status) << std::endl;
+			}
+			else if (WIFSIGNALED(status)) // killed
+			{
+				std::cout << "Process " << pid << " was killed by signal " << WTERMSIG(status) << std::endl;
+			}
+			return false;
+		}
+	}
+
+	bool stopProcess(pid_t pid)
+	{
+		if (kill(pid, SIGTERM) == 0)
+		{
+			return true;
+		}
+		else
+		{
+			std::cerr << "Failed to send SIGTERM signal to process " << pid << std::endl;
+			return false;
+		}
+	}
+
+	int waitForProcess(pid_t pid)
+	{
+		int status;
+		if (waitpid(pid, &status, 0) == pid) {
+			if (WIFEXITED(status))
+			{
+				return WEXITSTATUS(status);
+			}
+			else if (WIFSIGNALED(status))
+			{
+				return -WTERMSIG(status);
+			}
+		}
+		return -1;
+	}
+};
+
 
 #endif //MP_OS_LAUNCHER_H

@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 
 	server_logger_builder builder;
 	controller_int<cw_string, student>* controller;
-	auto allocator = std::make_unique<allocator_boundary_tags>(10000);
+	auto allocator = std::make_unique<allocator_global_heap>(nullptr);
 	std::unique_ptr<logger> logger(builder.build());
 	auto comparer = std::less<cw_string>();
 
