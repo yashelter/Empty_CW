@@ -4,6 +4,7 @@ project(cw_utility LANGUAGES CXX)
 
 add_library(
         cw_utility
+        SHARED
         generator.h
         crutch.cpp)
 target_include_directories(

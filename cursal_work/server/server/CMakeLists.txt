@@ -10,6 +10,7 @@ find_package(Crow CONFIG REQUIRED)
 
 add_library(
         cw_server_lib
+        SHARED
         server.h
         server.cpp)
 target_include_directories(

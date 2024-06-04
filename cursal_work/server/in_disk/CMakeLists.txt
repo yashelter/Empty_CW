@@ -12,6 +12,7 @@ find_package(crossguid CONFIG REQUIRED)
 
 add_library(
         cw_disk
+        SHARED
         controller/disk_controller.h
         controller/disk_controller.cpp
         tree/b_tree_disk.h)

@@ -8,6 +8,7 @@ find_package(crossguid CONFIG REQUIRED)
 
 add_library(
         cw_interface
+        SHARED
         controller_int.h
         controller_int.cpp
         operation.h)
