@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <condition_variable>
 #include <atomic>
+#include <filesystem>
 
 #define BOOST_THREAD_PROVIDES_FUTURE
 #define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
@@ -151,13 +152,14 @@ private:
 
     using time_point_t = controller_int<tkey, tvalue>::time_point_t;
 
-    std::string _root;
+    std::filesystem::path _root;
+    std::filesystem::path _bucket;
     logger* _logger;
 
     std::mutex _map_mut;
     std::unordered_map<CW_GUID, nlohmann::json> _request_result;
 
-    std::shared_mutex _history_mut;
+    std::mutex _history_mut;
     std::stack<std::pair<time_point_t, std::shared_ptr<in_disk_operation>>> _history;
     std::stack<std::pair<time_point_t, std::shared_ptr<in_disk_operation>>> _undone_history;
 
@@ -169,7 +171,7 @@ private:
 
 public:
 
-    disk_controller(const std::string& path = "database", logger* logger = nullptr);
+    explicit disk_controller(const std::string& path = "database", logger* logger = nullptr);
 
     disk_controller(const disk_controller& other) =delete;
     disk_controller(disk_controller&& other) noexcept =default;
@@ -194,9 +196,26 @@ public:
 
     std::optional<nlohmann::json> get(CW_GUID id) override;
 
-    virtual ~disk_controller() noexcept;
+    virtual ~disk_controller() noexcept =default;
 
 };
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+CW_GUID disk_controller<tkey, tvalue, compare, t>::add_pool(std::string pool_name)
+{
+    auto id = CW_GUID();
+
+    boost::async()
+
+    return id;
+}
+
+template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
+disk_controller<tkey, tvalue, compare, t>::disk_controller(const std::string &path, logger *logger) : _logger(logger)
+{
+    _root = std::filesystem::weakly_canonical("./" + path);
+    _bucket = std::filesystem::weakly_canonical("./" + path + "_bucket");
+}
 
 
 #endif //MP_OS_DISK_CONTROLLER_H

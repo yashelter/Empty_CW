@@ -190,15 +190,15 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 			return crow::response(400, "Missing 'id' in JSON");
 		}
 
-		CW_GUID id = data["id"].get<CW_GUID>(); // TODO
+//		CW_GUID id = data["id"].get<CW_GUID>();
 
-		std::optional<nlohmann::json> result = _controller->get(id);
+//		std::optional<nlohmann::json> result = _controller->get(id);
 
-		if (result) {
-			return crow::response(200, result->dump());
-		} else {
-			return crow::response(404, "Not Found");
-		}
+//		if (result) {
+//			return crow::response(200, result->dump());
+//		} else {
+//			return crow::response(404, "Not Found");
+//		}
 	});
 
 
