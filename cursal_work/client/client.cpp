@@ -1,8 +1,8 @@
 #include "client.h"
 
-
-
 const std::regex Client::_exit_reg("exit", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_hint_reg("hint", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_heart_reg("heart", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_mode_reg("change_mode", std::regex_constants::icase | std::regex_constants::optimize);
 
 const std::regex Client::_add_pool_reg("new_pool", std::regex_constants::icase | std::regex_constants::optimize);
@@ -301,6 +301,7 @@ std::string Client::get_hint()
     std::string str;
     str = "To add new pool : new_pool {pool name}\n";
     str += "hint : show available commands\n";
+    str += "remove_pool {pool_name} : add new pool\n";
     str += "To exit : exit\n";
     return str;
 }
@@ -321,7 +322,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
            cin >> arg;
            if (!std::regex_match(arg, _all_num_reg))
            {
-               cout << invalid_param << std::endl;
+               cout << invalid_param;
                continue;
            }
            std::optional<std::string> response = add_pool(arg);
@@ -422,11 +423,66 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
             cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
             // TODO: parse answer
         }
+        else if (std::regex_match(command, _read_value_reg))
+        {
+            std::string arg2, arg3, arg4;
+            cin >> arg >> arg2 >> arg3 >> arg4;
+            if (!std::regex_match(arg, _all_num_reg) || !std::regex_match(arg2, _all_num_reg) ||
+                !std::regex_match(arg3, _all_num_reg) || !std::regex_match(arg4, _all_num_reg))
+            {
+                cout << invalid_param << std::endl;
+                continue;
+            }
+            bool need_persist = false;
+            cout << "Do you want look old data: 0-No, 1-Yes >> ";
+            cin >> need_persist;
+            std::time_t time = 0;
+
+            if (need_persist)
+            {
+                std::string line;
+                do
+                {
+                    cout << "Enter date in format %d.%m.%Y-%H:%M:%S> (numbers with symbols) >>  ";
+                    cin >> line;
+                    time = input_time(line);
+                } while (time == 0);
+            }
+
+            std::optional<std::string> response = read_value(arg, arg2, arg3, arg4,
+                                                             need_persist,
+                                                             need_persist ? time :std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+
+            if (!response.has_value())
+            {
+                cout << std::endl;
+                cout << "Failed while sent message\n";
+                continue;
+            }
+            cout << "Getted Answer :" << get_answer_from_server(response.value()) << std::endl;
+            // TODO: parse answer
+        }
         // TODO: read value, read range, update
         else if (std::regex_match(command, _exit_reg))
         {
             cout << "Stopping Client App" << std::endl;
             return;
+        }
+        else if (std::regex_match(command, _heart_reg))
+        {
+            bool is_alive = heart();
+            if (is_alive)
+            {
+                cout << "Server working successfully\n";
+            }
+            else
+            {
+                cout << "Server not response\n";
+            }
+        }
+        else if (std::regex_match(command, _hint_reg))
+        {
+            cout << get_hint() << std::endl;
         }
         else if (std::regex_match(command, _mode_reg))
         {
@@ -443,9 +499,76 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
 student Client::read_student(std::istream &cin, std::ostream &cout)
 {
     student stud;
-    cin >> stud._name;
-    cin >> stud._surname;
-    cin >> stud._group;
+    do
+    {
+        cout << "Enter student surname >> ";
+        cin >> stud._surname;
+        cout << std::endl;
+    } while (!std::regex_match(stud._surname, _all_num_reg));
+
+    do
+    {
+        cout << "Enter student name >> ";
+        cin >> stud._name;
+        cout << std::endl;
+    } while (!std::regex_match(stud._surname, _all_num_reg));
+
+    do
+    {
+        cout << "Enter student group >> ";
+        cin >> stud._group;
+        cout << std::endl;
+    } while (!std::regex_match(stud._surname, _all_num_reg));
+
+    cout << "Enter student course >> ";
+    cin >> stud._course;
+    cout << std::endl;
+
+    cout << "Enter pairs subject - mark,  <end>- to end entering marks" <<
+        std::endl << "Enter subject >> ";
+
+    std::string subj;
+    unsigned short mark;
+    while (cin >> subj && subj != "end")
+    {
+        cout << "Enter mark :" << std::endl;
+        cin >> mark;
+        stud._subjects.emplace_back(subj, mark);
+        cout << "Enter subject >> ";
+    }
+
+    cout << "Student successfully made\n";
     return stud;
 }
 
+bool Client::heart()
+{
+    // httplib::Params params;
+    auto res = _client.Get("/heart", {}, httplib::Headers());
+    return (res && res->status == 200);
+}
+
+std::string Client::get_new_student(std::istream &cin, std::ostream &cout)
+{
+    student stud = read_student(cin, cout);
+    json js = stud.to_json();
+    return to_string(js);
+}
+
+
+std::time_t Client::input_time(const std::string& line)
+{
+    std::tm t = {};
+    std::istringstream ss(line);
+    //ss.imbue(std::locale("de_DE.utf-8"));
+
+    ss >> std::get_time(&t, "%d.%m.%Y-%H:%M:%S");
+
+    if (ss.fail())
+    {
+        return 0;
+    }
+
+    std::time_t time = std::mktime(&t);
+    return time;
+}
