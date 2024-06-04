@@ -50,12 +50,12 @@ concept input_iterator_for_pair = std::input_iterator<f_iter> && std::same_as<ty
 template<typename T>
 concept serializable = requires (const T t, std::fstream s, const nlohmann::json j)
                        {
-                           {t.serialize()};////////////t.serialize(s)
-//                           {T::deserialize(s)} -> std::same_as<T>;
-//                           {t.serialize_size()} -> std::same_as<size_t>;
-//                           {t.to_json()} -> std::same_as<nlohmann::json>;
-//                           {T::from_json(j)} -> std::same_as<T>;
-                       }; //&& std::copyable<T>;
+                           {t.serialize(s)};
+                           {T::deserialize(s)} -> std::same_as<T>;
+                           {t.serialize_size()} -> std::same_as<size_t>;
+                           {t.to_json()} -> std::same_as<nlohmann::json>;
+                           {T::from_json(j)} -> std::same_as<T>;
+                       } && std::copyable<T>;
 
 
 template <serializable tkey, serializable tvalue>
