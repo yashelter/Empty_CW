@@ -4,7 +4,7 @@
 
 #ifdef _WIN32
 #include <process.h>
-#elif
+#else
 #include <unistd.h>
 #endif
 
@@ -45,7 +45,7 @@ server_logger::server_logger(const std::string& dest,
         par.emplace("path", pair.second.first);
         par.emplace("console", pair.second.second ? "1" : "0");
 
-        _client.Get("/init", par, httplib::Headers());
+        auto res = _client.Get("/init", par, httplib::Headers());
     }
 }
 

@@ -11,6 +11,7 @@ project(mp_os_lggr_srvr_lggr_tests)
 
 
 find_package(Crow CONFIG REQUIRED)
+include_directories (${Boost_INCLUDE_DIRS})
 
 #FetchContent_MakeAvailable(
 #        googletest)
@@ -52,7 +53,7 @@ add_executable(
         server_test.cpp)
 target_link_libraries(
         serv_test
-        PRIVATE
+        PUBLIC
 #        gtest_main
         Crow::Crow
 )
@@ -68,6 +69,18 @@ target_link_libraries(
         serv_test
         PUBLIC
         mp_os_lggr_srvr_lggr)
+target_link_libraries(
+        serv_test
+        PUBLIC
+        ${BOOST_LIBRARIES})
+target_link_libraries(
+        serv_test
+        PUBLIC
+        ws2_32)
+target_link_libraries(
+        serv_test
+        PUBLIC
+        wsock32)
 set_target_properties(
         serv_test PROPERTIES
         LANGUAGES CXX

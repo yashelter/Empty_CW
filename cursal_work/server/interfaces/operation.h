@@ -8,6 +8,8 @@
 template<typename T>
 class operation
 {
+public:
+
     virtual void undo(T&) =0;
     virtual void redo(T&) =0;
 

@@ -11,8 +11,10 @@ int main(
 
     server_logger_builder builder;
 
-    builder.add_file_stream("a.txt", logger::severity::trace)->add_file_stream("b.txt", logger::severity::debug)->
-            add_console_stream(logger::severity::trace)->add_file_stream("a.txt", logger::severity::information);
+//    builder.add_file_stream("a.txt", logger::severity::trace)->add_file_stream("b.txt", logger::severity::debug)->
+//            add_console_stream(logger::severity::trace)->add_file_stream("a.txt", logger::severity::information);
+
+    builder.transform_with_configuration("form.json", "log");
 
     std::unique_ptr<logger> log(builder.build());
 
