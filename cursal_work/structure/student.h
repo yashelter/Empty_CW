@@ -18,8 +18,12 @@ public:
     cw_string(const std::string& other);
     cw_string(std::string&& other);
 
+    cw_string & operator=(const std::string &other);
+    cw_string &operator=(std::string &&other);
+
     static std::mutex file_mut;
     constexpr static std::string path = "strings.str";
+
     void serialize(std::fstream& stream) const;
     size_t serialize_size() const noexcept;
 
@@ -30,8 +34,7 @@ public:
 
     std::string to_string() const;
 
-    static std::mutex file_mut;
-    static constexpr std::string path = "strings.str";
+
 };
 
 class student final
