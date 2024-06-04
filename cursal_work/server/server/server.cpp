@@ -155,12 +155,12 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 		json jsn = json(body);
 		CW_GUID id = jsn;
 
-		std::optional<nlohmann::json> result = _controller->get(id);
+//		std::optional<nlohmann::json> result = _controller->get(id);
 
-		if (result) {
+	if (result) 
+{
 			return crow::response(200, result.value().dump());
 		} else {
 			return crow::response(404, "Not Found");
-		}
-	});
+		}	});
 }

@@ -91,7 +91,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_range(std::string pool
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name, collection_name, lower, upper, need_persist, time](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name, lower, upper, need_persist, time](){
 
         if (need_persist)
         {
@@ -257,7 +257,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_value(std::string pool
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name, collection_name, key, need_persist, time](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name, key, need_persist, time](){
 
         if (need_persist)
         {
@@ -379,7 +379,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::update(std::string pool_nam
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name, collection_name, key, value](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name, key, value](){
         std::shared_lock lock(_root._mut);
 
         auto pool_it = _root.find(pool_name);
@@ -431,7 +431,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::remove(std::string pool_nam
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name, collection_name, key](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name, key](){
         std::shared_lock lock(_root._mut);
 
         auto pool_it = _root.find(pool_name);
@@ -483,7 +483,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::insert(std::string pool_nam
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name, collection_name, key, value](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name, key, value](){
         std::shared_lock lock(_root._mut);
 
         auto pool_it = _root.find(pool_name);
@@ -550,7 +550,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::remove_collection(std::stri
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name, collection_name](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name](){
         std::shared_lock lock(_root._mut);
 
         auto pool_it = _root.find(pool_name);
@@ -595,7 +595,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::add_collection(std::string 
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name, collection_name](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name](){
         std::shared_lock lock(_root._mut);
 
         auto pool_it = _root.find(pool_name);
@@ -637,7 +637,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::remove_scheme(std::string p
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name](){
         std::shared_lock lock(_root._mut);
 
         auto pool_it = _root.find(pool_name);
@@ -674,7 +674,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::add_scheme(std::string pool
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name, scheme_name](){
+    boost::async(boost::launch::async, [this, id, pool_name, scheme_name](){
         std::shared_lock lock(_root._mut);
 
         auto pool_it = _root.find(pool_name);
@@ -709,7 +709,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::remove_pool(std::string poo
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name](){
+    boost::async(boost::launch::async, [this, id, pool_name](){
         std::lock_guard lock(_root._mut);
 
         auto it = _root.find(pool_name);
@@ -739,7 +739,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::add_pool(std::string pool_n
 {
     CW_GUID id;
 
-    boost::async([this, id, pool_name](){
+    boost::async(boost::launch::async, [this, id, pool_name](){
         std::lock_guard lock(_root._mut);
 
         auto [it, res] = _root.insert(std::make_pair(pool_name, pool_t(std::less<std::string>(), _allocator, _logger)));
