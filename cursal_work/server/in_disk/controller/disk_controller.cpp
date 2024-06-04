@@ -14,3 +14,4 @@ generator<unsigned int> atomic_index_gen()
         ++num;
     }
 }
+
