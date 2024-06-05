@@ -127,12 +127,9 @@ student student::from_json(const nlohmann::json &json)
         auto n = j.find("subject");
         auto m = j.find("mark");
 
-        if (n == j.end() || m == j.end() || !n->is_string() || !m->is_number_integer())
-            throw std::runtime_error("Incorrect json marks for parsing student");
+        res._subjects.emplace_back(n->get<std::string>(), m->get<int>());
 
-        res._subjects.emplace_back(nlohmann::to_string(*n), m->get<int>());
     }
-
     return res;
 }
 
@@ -150,7 +147,7 @@ nlohmann::json student::to_json() const
     for(auto& pair: _subjects)
     {
         nlohmann::json tmp;
-        tmp["subject"] = pair.first.to_string();
+        tmp["subject"] = (pair.first).to_string();
         tmp["mark"] = pair.second;
 
         arr.push_back(tmp);

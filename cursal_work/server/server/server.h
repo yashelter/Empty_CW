@@ -108,14 +108,25 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                                         auto need_persist = req.url_params.get("need_persist");
                                         auto time_str = req.url_params.get("time");
                                         auto key = req.url_params.get("key");
-
+                                        //using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
                                         typename controller_int<tkey, tvalue>::time_point_t time;
-                                        if (!time_str){
-                                            auto val = std::chrono::system_clock::from_time_t(std::stoll(time_str)); // TODO
+                                        if (!time_str)
+                                        {
+#ifdef WIN32
+                                            auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
                                             time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
-                                        } else {
+#else
+                                            time = std::chrono::system_clock::from_time_t(std::stoll(time_str));
+#endif
+                                        }
+                                        else
+                                        {
+#ifdef WIN32
                                             auto val = std::chrono::system_clock::now();
                                             time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+#else
+                                            time = std::chrono::system_clock::now();
+#endif
                                         }
 
                                         CW_GUID result = _controller->read_value(pool_name, scheme_name, collection_name, tkey(key), need_persist - '0', time);
@@ -136,12 +147,22 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
         if (!time_str)
         {
-            auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
-            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+            #ifdef WIN32
+                auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
+                time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+            #else
+                time = std::chrono::system_clock::from_time_t(std::stoll(time_str));
+            #endif
 
-        } else {
+        }
+        else
+        {
+#ifdef WIN32
             auto val = std::chrono::system_clock::now();
             time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+#else
+            time = std::chrono::system_clock::now();
+#endif
         }
 
         CW_GUID result = _controller->read_range(pool_name, scheme_name, collection_name, lower_key, upper_key, need_persist - '0', time);
@@ -179,20 +200,20 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
     });
 
     CROW_ROUTE(app, "/get") ([&](const crow::request &req)
-    {
-        std::string body = req.url_params.get("GUID");
-        json jsn = json::parse(body);
-        CW_GUID id = CW_GUID(jsn);
+                             {
+                                 std::string body = req.url_params.get("GUID");
+                                 json jsn = json::parse(body);
+                                 CW_GUID id = CW_GUID(jsn);
 
-        std::optional<nlohmann::json> result = _controller->get(id);
-        if (result)
-        {
-            return crow::response(200, to_string(result.value()));
-        } else
-        {
-            return crow::response(404, "Not Found");
-        }
-    });
+                                 std::optional<nlohmann::json> result = _controller->get(id);
+                                 if (result)
+                                 {
+                                     return crow::response(200, to_string(result.value()));
+                                 } else
+                                 {
+                                     return crow::response(404, "Not Found");
+                                 }
+                             });
 
     std::string ip_address = "127.0.0.1";
     app.bindaddr(ip_address).port(port).multithreaded();

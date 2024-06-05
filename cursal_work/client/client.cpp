@@ -191,14 +191,14 @@ std::optional<std::string>
 Client::update(const std::string &pool_name,
                const std::string &scheme_name,
                const std::string &collection_name,
-               const json &student)
+               const std::string &student)
 {
     httplib::Params params;
 
     params.emplace("pool_name", pool_name);
     params.emplace("scheme_name", scheme_name);
     params.emplace("collection_name", collection_name);
-    params.emplace("data", to_string(student));
+    params.emplace("data", student);
 
     auto res = _client.Get("/update", params, httplib::Headers());
 
@@ -331,8 +331,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                cout << "Failed while sent message\n";
                continue;
            }
-           get_answer_from_server(cin, cout, response.value(), &simple_parse);
-           // TODO: parse answer
+           get_answer_from_server(cin, cout, response.value(), &parse_message);
         }
         else if (std::regex_match(command, _remove_pool_reg))
         {
@@ -348,8 +347,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
-            // TODO: parse answer
+            get_answer_from_server(cin, cout, response.value(),&parse_message);
         }
         else if (std::regex_match(command, _add_scheme_reg))
         {
@@ -366,8 +364,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
-            // TODO: parse answer
+            get_answer_from_server(cin, cout, response.value(),&parse_message);
         }
         else if (std::regex_match(command, _remove_scheme_reg))
         {
@@ -384,8 +381,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
-            // TODO: parse answer
+            get_answer_from_server(cin, cout, response.value(),&parse_message);
         }
         else if (std::regex_match(command, _add_collection_reg))
         {
@@ -402,8 +398,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
-            // TODO: parse answer
+            get_answer_from_server(cin, cout, response.value(),&parse_message);
         }
         else if (std::regex_match(command, _remove_collection_reg))
         {
@@ -459,8 +454,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
-            // TODO: parse answer
+            get_answer_from_server(cin, cout, response.value(),&parse_student);
         }
         else if (std::regex_match(command, _read_range_reg))
         {
@@ -499,7 +493,6 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 continue;
             }
             get_answer_from_server(cin, cout, response.value(),&simple_parse);
-            // TODO: parse answer
         }
         else if (std::regex_match(command, _update_reg))
         {
@@ -521,7 +514,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
+            get_answer_from_server(cin, cout, response.value(),&parse_message);
         }
         else if (std::regex_match(command, _remove_reg))
         {
@@ -542,7 +535,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
+            get_answer_from_server(cin, cout, response.value(),&parse_message);
         }
         else if (std::regex_match(command, _insert_reg))
         {
@@ -554,8 +547,11 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << invalid_param << std::endl;
                 continue;
             }
-            std::string student = get_new_student(cin, cout);
-            std::optional<std::string> response = insert(arg, arg2, arg3, student);
+            std::string res = get_new_student(cin, cout);
+            //student st = student::from_json(json::parse(res));
+            //cout << st.to_json().dump() << std::endl;
+
+            std::optional<std::string> response = insert(arg, arg2, arg3, res);
 
             if (!response.has_value())
             {
@@ -563,7 +559,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 cout << "Failed while sent message\n";
                 continue;
             }
-            get_answer_from_server(cin, cout, response.value(),&simple_parse);
+            get_answer_from_server(cin, cout, response.value(),&parse_message);
         }
         else if (std::regex_match(command, _exit_reg))
         {
@@ -621,7 +617,6 @@ student Client::read_student(std::istream &cin, std::ostream &cout)
 
     cout << "Enter student course >> ";
     cin >> stud._course;
-
     cout << "Enter pairs subject - mark,  <end>- to end entering marks" << std::endl;
 
     std::string subj;
@@ -638,7 +633,7 @@ student Client::read_student(std::istream &cin, std::ostream &cout)
             unsigned short mark;
             cout << "Enter mark : ";
             cin >> mark;
-            stud._subjects.emplace_back(subj, mark);
+            stud._subjects.emplace_back(temp, mark);
         }
         subj = temp;
     }
@@ -685,3 +680,22 @@ void Client::simple_parse(std::ostream &cout, std::string &line)
     cout << std::setw(4) << js<< std::endl;
 
 }
+
+void Client::parse_message(std::ostream &cout, std::string &line)
+{
+    json js = json::parse(line);
+    std::string str = js["message"].template get<std::string>();;
+    cout << str << std::endl;
+}
+
+void Client::parse_student(std::ostream &cout, std::string &line)
+{
+    simple_parse(cout, line);
+    json js = json::parse(line);
+    std::cout << "here";
+    auto str = js["data"].template get<std::string>(); // read_value pool1 scheme1 col1 Skywalker 0
+    std::cout << "here";
+    student stud = student::from_json(json::parse(str));
+    cout << stud.to_string() << std::endl;
+}
+
