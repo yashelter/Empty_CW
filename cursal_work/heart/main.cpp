@@ -5,8 +5,12 @@
 #include <string>
 
 
-int main(int argc, char* argv[])
+int main()
 {
+	int argc = 4;
+	char* argv[] = {"", "/Users/vladimirzaslavtsev/University/MatPractic_Osi/OS/Empty_CW/cmake-build-debug/cursal_work/server/cw_server",
+					"memory", "9030"};
+
 	if (argc != 4)
 	{
 		std::cerr << "Usage: " << argv[0] << " <server_path> <controller_type> <port>" << std::endl;
@@ -33,8 +37,13 @@ int main(int argc, char* argv[])
 	}
 
 	Heart heart(server_path, port, controller_type);
-	heart.start();
-	// Как остановить (закончить работу)
+
+	std::thread heart_thread([&]() { heart.start(); });
+
+	std::cout << "Press Enter to stop..." << std::endl;
+	std::cin.ignore();
 	heart.stop();
+	heart_thread.join();
+
 	return 0;
 }
