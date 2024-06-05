@@ -63,20 +63,20 @@ class controller_int
 {
 public:
 
-    using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
+    using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
 
     virtual CW_GUID add_pool(std::string pool_name) =0;
     virtual CW_GUID remove_pool(std::string pool_name) =0;
 
-    virtual CW_GUID add_scheme(std::string pool_name, std::string scheme_name) =0;
-    virtual CW_GUID remove_scheme(std::string pool_name, std::string scheme_name) =0;
+    virtual CW_GUID add_scheme(std::string pool_name, std::string scheme_name) = 0;
+    virtual CW_GUID remove_scheme(std::string pool_name, std::string scheme_name) = 0;
 
     virtual CW_GUID add_collection(std::string pool_name, std::string scheme_name, std::string collection_name) =0;
     virtual CW_GUID remove_collection(std::string pool_name, std::string scheme_name, std::string collection_name) =0;
 
     virtual CW_GUID insert(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) =0; // insert if not exist
-    virtual CW_GUID read_value(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, bool need_persist, time_point_t time = std::chrono::system_clock::now()) =0;
-    virtual CW_GUID read_range(std::string pool_name, std::string scheme_name, std::string collection_name, tkey lower, tkey upper, bool need_persist, time_point_t time = std::chrono::system_clock::now()) =0;
+    virtual CW_GUID read_value(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) =0;
+    virtual CW_GUID read_range(std::string pool_name, std::string scheme_name, std::string collection_name, tkey lower, tkey upper, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) =0;
     virtual CW_GUID update(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) =0; // updates if exist
     virtual CW_GUID remove(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key) =0;
 
