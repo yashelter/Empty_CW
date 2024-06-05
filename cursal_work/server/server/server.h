@@ -109,16 +109,17 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                                         auto need_persist = req.url_params.get("need_persist");
                                         auto time_str = req.url_params.get("time");
                                         auto key = req.url_params.get("key");
-
+                                        //using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
                                         typename controller_int<tkey, tvalue>::time_point_t time;
                                         if (!time_str){
                                             auto val = std::chrono::system_clock::from_time_t(std::stoll(time_str)); // TODO
-                                            time = val;
+                                            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
                                         } else {
-                                            time = std::chrono::system_clock::now();
+                                            auto val = std::chrono::system_clock::now();
+                                            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
                                         }
 
-                                        CW_GUID result = _controller->read_value(pool_name, scheme_name, collection_name, key, need_persist - '0', time);
+                                        CW_GUID result = _controller->read_value(pool_name, scheme_name, collection_name, tkey(key), need_persist - '0', time);
 
                                         return crow::response(200, result.to_json()); // TODO
                                     });
@@ -130,15 +131,18 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
         auto need_persist = req.url_params.get("need_persist");
         auto time_str = req.url_params.get("time");
 
-        tkey lower_key = req.url_params.get("lower");
-        tkey upper_key = req.url_params.get("upper");
+        tkey lower_key = tkey(req.url_params.get("lower"));
+        tkey upper_key = tkey(req.url_params.get("upper"));
         typename controller_int<tkey, tvalue>::time_point_t time;
 
         if (!time_str)
         {
-            time = std::chrono::system_clock::from_time_t(std::stoll(time_str)); // TODO
+            auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
+            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+
         } else {
-            time = std::chrono::system_clock::now();
+            auto val = std::chrono::system_clock::now();
+            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
         }
 
         CW_GUID result = _controller->read_range(pool_name, scheme_name, collection_name, lower_key, upper_key, need_persist - '0', time);
@@ -170,7 +174,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
         auto collection_name = req.url_params.get("collection_name");
 
         auto key = req.url_params.get("data");
-        CW_GUID result = _controller->remove(pool_name, scheme_name, collection_name, key);
+        CW_GUID result = _controller->remove(pool_name, scheme_name, collection_name, tkey(key));
 
         return crow::response(200, result.to_json()); // TODO
     });
