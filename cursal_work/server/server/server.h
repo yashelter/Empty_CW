@@ -109,25 +109,20 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                                         auto time_str = req.url_params.get("time");
                                         auto key = req.url_params.get("key");
                                         //using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
+
                                         typename controller_int<tkey, tvalue>::time_point_t time;
-                                        if (!time_str)
-                                        {
-#ifdef WIN32
+
+                                        #ifdef WIN32
                                             auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
+                                            std::cout << val << std::endl;
                                             time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
-#else
+                                            std::cout << time << std::endl;
+                                            std::cout <<  std::chrono::system_clock::from_time_t(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+                                        #else
                                             time = std::chrono::system_clock::from_time_t(std::stoll(time_str));
-#endif
-                                        }
-                                        else
-                                        {
-#ifdef WIN32
-                                            auto val = std::chrono::system_clock::now();
-                                            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
-#else
-                                            time = std::chrono::system_clock::now();
-#endif
-                                        }
+                                        #endif
+
+
 
                                         CW_GUID result = _controller->read_value(pool_name, scheme_name, collection_name, tkey(key), need_persist - '0', time);
 
@@ -216,6 +211,8 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                              });
 
     std::string ip_address = "127.0.0.1";
+    app.bindaddr(ip_address).port(port).multithreaded();
+    app.run();
 }
 
 #endif //MP_OS_SERVER_H

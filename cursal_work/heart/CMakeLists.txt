@@ -9,11 +9,19 @@ add_executable(
         heart.cpp
         ../launcher/launcher.cpp
         ../launcher/launcher.h
+        ../client/client.h
+        ../client/client.cpp
+        ../structure/student.h
+        ../structure/student.cpp
         main.cpp)
 target_link_libraries(
         cw_heart
         PUBLIC
         httplib::httplib)
+target_link_libraries(
+        cw_heart
+        PUBLIC
+        mp_os_lggr_srvr_lggr)
 target_link_libraries(
         cw_heart
         PUBLIC
