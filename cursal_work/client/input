@@ -1,8 +1,5 @@
 heart
 
-new_pool a
-remove_pool a
-
 new_pool pool1
 new_pool pool2
 new_pool pool1

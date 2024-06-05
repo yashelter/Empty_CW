@@ -8,11 +8,11 @@ const std::regex Client::_mode_reg("change_mode", std::regex_constants::icase | 
 const std::regex Client::_add_pool_reg("new_pool", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_remove_pool_reg("remove_pool", std::regex_constants::icase | std::regex_constants::optimize);
 
-const std::regex Client::_add_scheme_reg("new_scheme ", std::regex_constants::icase | std::regex_constants::optimize);
-const std::regex Client::_remove_scheme_reg("remove_scheme ", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_add_scheme_reg("new_scheme", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_remove_scheme_reg("remove_scheme", std::regex_constants::icase | std::regex_constants::optimize);
 
 const std::regex Client::_add_collection_reg("new_collection", std::regex_constants::icase | std::regex_constants::optimize);
-const std::regex Client::_remove_collection_reg("remove_collection  ", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_remove_collection_reg("remove_collection", std::regex_constants::icase | std::regex_constants::optimize);
 
 const std::regex Client::_insert_reg("insert", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_remove_reg("remove", std::regex_constants::icase | std::regex_constants::optimize);
