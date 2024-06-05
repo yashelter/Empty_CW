@@ -1,3 +1,53 @@
 heart
-new_pool fdlfdsjklkfds
-read_value pool scheme collection surname 1 01.02.2022-23:23:23
+new_pool message
+
+new_pool pool1
+new_pool pool2
+new_pool pool1
+remove_pool pool1
+new_pool pool1
+new_pool pool3
+
+new_scheme pool1 scheme1
+new_scheme pool1 scheme2
+new_scheme pool1 scheme4
+new_scheme pool1 scheme4
+remove_scheme pool1 scheme4
+new_scheme pool1 scheme4
+
+new_collection pool1 scheme1 col1
+new_collection pool1 scheme1 col2
+new_collection pool1 scheme1 col3
+new_collection pool1 scheme1 col3
+remove_collection pool1 scheme1 col3
+new_collection pool1 scheme1 col3
+
+insert pool1 scheme1 col1 Novicov Sergey MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Ivkovich Ivan MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Zaslavtsev Maxim MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Gubarev Mikhail MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Fedorkov Alexander MO211 2 math 5 osi 5 physics 5 end
+
+insert pool1 scheme1 col1 Ayanami Aska MO211 2 math 4 osi 3 end
+insert pool1 scheme1 col1 Mikoto Misaka MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Ayanami Aska MO211 2 math 4 osi 3 end
+insert pool1 scheme1 col1 Akkerman Mikasa MO211 2 math 4 osi 3 end
+insert pool1 scheme1 col1 Jager Eren MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Gosling Rayan MO211 2 math 4 osi 3 end
+insert pool1 scheme1 col1 Yagami Light MO211 2 math 4 osi 5 end
+insert pool1 scheme1 col1 Lowlight L MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Skywalker Anakin MO211 2 math 5 osi 5 end
+insert pool1 scheme1 col1 Kirigaya Kirito MO211 2 math 2 osi 2 physics 2 end
+
+read_value pool1 scheme1 col1 Skywalker 1 01.01.2000-20:00:00
+
+remove pool1 scheme1 col1 Kirigaya
+read_value pool1 scheme1 col1 Skywalker 0
+read_range pool1 scheme1 col1 Novicov Yagami 0
+update pool1 scheme1 col1 Ayanami Ray MO211 2 math 5 osi 5 tech 5 end
+
+hint
+
+exit
+
+insert pool1 scheme1 col1 Gosling3 Rayan2 MO211 2 math 5 osi 55 end
