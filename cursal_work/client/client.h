@@ -25,6 +25,7 @@ private:
 
     static const std::regex _add_pool_reg;
     static const std::regex _hint_reg;
+    static const std::regex _remove_reg;
     static const std::regex _exit_reg;
     static const std::regex _heart_reg;
 	static const std::regex _all_num_reg;
@@ -77,7 +78,7 @@ private:
     std::optional<std::string> remove(const std::string& pool_name,
                                       const std::string& scheme_name,
                                       const std::string& collection_name,
-                                      const std::string &student);
+                                      const std::string &surname);
 
     std::optional<std::string> read_value(const std::string& pool_name,
                                           const std::string& scheme_name,
