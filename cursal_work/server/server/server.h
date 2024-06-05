@@ -17,7 +17,7 @@ class Server
 
 public:
 
-    Server(controller_int<tkey, tvalue>* controller, uint16_t port = 9300);
+    Server(controller_int<tkey, tvalue>* controller, uint16_t port = 9030);
 };
 
 
@@ -37,7 +37,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
     CROW_ROUTE(app, "/add_pool") ([&](const crow::request &req) {
         auto pool_name = req.url_params.get("pool_name");
         CW_GUID result = _controller->add_pool(pool_name);
-
+        
         return crow::response(200, result.to_json());
     });
 
@@ -192,8 +192,8 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
             return crow::response(404, "Not Found");
         }
     });
-
-    app.port(port).multithreaded();
+    std::string ip_address = "127.0.0.1";
+    app.bindaddr(ip_address).port(port).multithreaded().run();
     app.run();
 }
 

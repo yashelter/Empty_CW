@@ -476,7 +476,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
             }
             else
             {
-                cout << "Server not response\n";
+                cout << "Server not working...\n";
             }
         }
         else if (std::regex_match(command, _hint_reg))
@@ -542,8 +542,8 @@ student Client::read_student(std::istream &cin, std::ostream &cout)
 
 bool Client::heart()
 {
-    // httplib::Params params;
-    auto res = _client.Get("/heart", {}, httplib::Headers());
+    httplib::Params params;
+    auto res = _client.Get("/heart", params, httplib::Headers());
     return (res && res->status == 200);
 }
 
