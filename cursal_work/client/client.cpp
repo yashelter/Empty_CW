@@ -302,10 +302,23 @@ void Client::get_answer_from_server(std::istream& cin, std::ostream& cout, const
 std::string Client::get_hint()
 {
     std::string str;
-    str = "To add new pool : new_pool {pool name}\n";
-    str += "hint : show available commands\n";
-    str += "remove_pool {pool_name} : add new pool\n";
-    str += "To exit : exit\n";
+    str = "hint : shows available commands\n";
+    str += "new_pool {pool name} : add new pool\n";
+    str += "remove_pool {pool_name} : removes existing pool\n";
+
+    str += "new_scheme {pool name} {scheme_name} : add new scheme\n";
+    str += "remove_scheme {pool name} {scheme_name} : removes existing scheme\n";
+
+    str += "new_collection {pool name} {scheme_name} {collection name} : add new collection\n";
+    str += "remove_collection {pool name} {scheme_name} {collection name} : removes existing collection\n";
+
+    str += "insert  {pool name} {scheme_name} {collection name} {student (input)} : inserts new student\n";
+    str += "update {pool name} {scheme_name} {collection name} {student (input), surname=key} : update student with this surname\n";
+    str += "remove {pool name} {scheme_name} {collection name} {surname=key} : removes existing student with given surname\n";
+    str += "read_value {pool name} {scheme_name} {collection name} {surname=key} : returns student with given surname\n";
+    str += "read_range {pool name} {scheme_name} {collection name} {surname=up_key}  {surname=down_key} : returns students in range with given surname\n";
+
+    str += "exit : stops dialog\n";
     return str;
 }
 
@@ -668,7 +681,6 @@ std::time_t Client::input_time(const std::string& line)
 {
     std::tm t = {};
     std::istringstream ss(line);
-    //ss.imbue(std::locale("de_DE.utf-8"));
 
     ss >> std::get_time(&t, "%d.%m.%Y-%H:%M:%S");
 

@@ -37,8 +37,13 @@ int main()
 	}
 
 	Heart heart(server_path, port, controller_type);
-	heart.start();  // launch in enother thread
-    // cin - when enter - stop
+
+	std::thread heart_thread([&]() { heart.start(); });
+
+	std::cout << "Press Enter to stop..." << std::endl;
+	std::cin.ignore();
 	heart.stop();
+	heart_thread.join();
+
 	return 0;
 }
