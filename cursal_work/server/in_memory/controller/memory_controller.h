@@ -408,7 +408,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::update(std::string pool_nam
         if (it == coll_it->second.end())
             return std::string("Data with such key does not exist");
 
-        it->second = value;
+        coll_it->second.update(std::make_pair(key, value));
 
         return std::string("Data updated");
 
