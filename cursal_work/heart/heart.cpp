@@ -24,35 +24,26 @@ Heart::~Heart()
 void Heart::start()
 {
 	is_running = true;
-	monitor_thread_ = std::jthread(&Heart::monitor_our_server, this);
-}
-
-void Heart::stop()
-{
-	is_running = false;
-	if (monitor_thread_.joinable()) {
-		monitor_thread_.request_stop();
-		monitor_thread_.join();
-	}
-	process::stopProcess(server_process_);
-	std::cout << "Stopping server process: " << server_process_ << std::endl;
-}
-
-void Heart::monitor_our_server(std::stop_token stoken)
-{
-	while (!stoken.stop_requested() && is_running)
+	while (is_running)
 	{
-		if (!check_server()) {
+		if (!check_server())
+		{
 			restart_server();
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
+void Heart::stop()
+{
+	is_running = false;
+	process::stopProcess(server_process_);
+	std::cout << "Stopping server process";
+}
+
 bool Heart::check_server()
 {
-	auto res = client_.Get("/heart", {}, httplib::Headers());
-	return res && res->status == 200;
+	return client_.heart();
 }
 
 void Heart::restart_server()

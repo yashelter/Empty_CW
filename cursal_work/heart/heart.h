@@ -5,7 +5,6 @@
 #include "../launcher/launcher.h"
 #include <httplib.h>
 #include <thread>
-#include <stop_token>
 
 class Heart
 {
@@ -21,26 +20,17 @@ public:
 
 private:
 
-	void monitor_our_server(std::stop_token stoken);
-
 	bool check_server();
 
 	void restart_server();
 
 	std::string server_path_;
-
 	uint16_t port_;
-
 	std::string controller_type_;
-
 	std::string url_;
 
-	std::jthread monitor_thread_;
-
 	std::atomic<bool> is_running;
-
 	process::process_handle_t server_process_;
-
 	Client client_;
 };
 
