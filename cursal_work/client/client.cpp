@@ -8,10 +8,10 @@ const std::regex Client::_mode_reg("change_mode", std::regex_constants::icase | 
 const std::regex Client::_add_pool_reg("new_pool", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_remove_pool_reg("remove_pool", std::regex_constants::icase | std::regex_constants::optimize);
 
-const std::regex Client::_add_scheme_reg("add_scheme ", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_add_scheme_reg("new_scheme ", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_remove_scheme_reg("remove_scheme ", std::regex_constants::icase | std::regex_constants::optimize);
 
-const std::regex Client::_add_collection_reg("add_collection", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_add_collection_reg("new_collection", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_remove_collection_reg("remove_collection  ", std::regex_constants::icase | std::regex_constants::optimize);
 
 const std::regex Client::_insert_reg("insert", std::regex_constants::icase | std::regex_constants::optimize);
@@ -311,10 +311,11 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
     std::string str = "Successfully started client\nAwaiting your commands\n\n";
     cout << str << get_hint();
 
-    std::string command, arg;
-
-    while (cin >> command)
+    while (true)
     {
+        std::string command, arg;
+        cout << "Enter command : ";
+        cin >> command;
         if (std::regex_match(command, _add_pool_reg))
         {
            cin >> arg;
@@ -553,6 +554,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 continue;
             }
             std::string student = get_new_student(cin, cout);
+            cout << student << std::endl;
             std::optional<std::string> response = insert(arg, arg2, arg3, student);
 
             if (!response.has_value())
@@ -577,7 +579,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
             }
             else
             {
-                cout << "Server not working...\n";
+                cout << std::endl << "Server not working...\n";
             }
         }
         else if (std::regex_match(command, _hint_reg))
@@ -603,38 +605,42 @@ student Client::read_student(std::istream &cin, std::ostream &cout)
     {
         cout << "Enter student surname >> ";
         cin >> stud._surname;
-        cout << std::endl;
     } while (!std::regex_match(stud._surname, _all_num_reg));
 
     do
     {
         cout << "Enter student name >> ";
         cin >> stud._name;
-        cout << std::endl;
     } while (!std::regex_match(stud._surname, _all_num_reg));
 
     do
     {
         cout << "Enter student group >> ";
         cin >> stud._group;
-        cout << std::endl;
     } while (!std::regex_match(stud._surname, _all_num_reg));
 
     cout << "Enter student course >> ";
     cin >> stud._course;
-    cout << std::endl;
 
-    cout << "Enter pairs subject - mark,  <end>- to end entering marks" <<
-        std::endl << "Enter subject >> ";
+    cout << "Enter pairs subject - mark,  <end>- to end entering marks" << std::endl;
 
     std::string subj;
-    unsigned short mark;
-    while (cin >> subj && subj != "end")
+
+    while (subj != "end")
     {
-        cout << "Enter mark :" << std::endl;
-        cin >> mark;
-        stud._subjects.emplace_back(subj, mark);
-        cout << "Enter subject >> ";
+        cout << "Enter subject : ";
+
+        std::string temp;
+        cin >> temp;
+
+        if (temp != "end")
+        {
+            unsigned short mark;
+            cout << "Enter mark : ";
+            cin >> mark;
+            stud._subjects.emplace_back(subj, mark);
+        }
+        subj = temp;
     }
 
     cout << "Student successfully made\n";

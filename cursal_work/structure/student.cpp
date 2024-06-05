@@ -112,38 +112,21 @@ student student::from_json(const nlohmann::json &json)
 {
     student res;
 
-    auto surname = json.find("surname");
-
-    if (surname == json.end() || !surname->is_string())
-        throw std::runtime_error("Incorrect json for parsing student");
-
-    res._surname = nlohmann::to_string(*surname);
-
-    auto name = json.find("name");
-
-    if (name == json.end() || !name->is_string())
-        throw std::runtime_error("Incorrect json for parsing student");
-
-    res._name = nlohmann::to_string(*name);
-
-    auto group = json.find("group");
-
-    if (group == json.end() || !group->is_string())
-        throw std::runtime_error("Incorrect json for parsing student");
-
-    res._group = nlohmann::to_string(*group);
+    json.at("surname").get_to(res._surname);
+    json.at("name").get_to(res._name);
+    json.at("group").get_to(res._group);
 
     auto course = json.find("course");
 
     if (course == json.end() || !course->is_number_integer())
-        throw std::runtime_error("Incorrect json for parsing student");
+        throw std::runtime_error("Incorrect json  course for parsing student");
 
     res._course = course->get<int>();
 
     auto subjects = json.find("subjects");
 
     if (subjects == json.end() || !subjects->is_array())
-        throw std::runtime_error("Incorrect json for parsing student");
+        throw std::runtime_error("Incorrect json subjects for parsing student");
 
     for(auto& j: *subjects)
     {
@@ -151,7 +134,7 @@ student student::from_json(const nlohmann::json &json)
         auto m = j.find("mark");
 
         if (n == j.end() || m == j.end() || !n->is_string() || !m->is_number_integer())
-            throw std::runtime_error("Incorrect json for parsing student");
+            throw std::runtime_error("Incorrect json marks for parsing student");
 
         res._subjects.emplace_back(nlohmann::to_string(*n), m->get<int>());
     }
@@ -163,9 +146,9 @@ nlohmann::json student::to_json() const
 {
     nlohmann::json res;
 
-    res["surname"] = _surname.to_json();
-    res["name"] = _name.to_json();
-    res["group"] = _group.to_json();
+    res["surname"] = _surname;
+    res["name"] = _name;
+    res["group"] = _group;
     res["course"] = _course;
 
     nlohmann::json arr;

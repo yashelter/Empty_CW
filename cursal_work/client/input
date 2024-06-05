@@ -1,3 +1,28 @@
 heart
-new_pool fdlfdsjklkfds
+
+new_pool a
+remove_pool a
+
+new_pool pool1
+new_pool pool2
+new_pool pool1
+remove_pool pool1
+new_pool pool1
+new_pool pool3
+
+new_scheme pool1 scheme1
+new_scheme pool1 scheme2
+new_scheme pool1 scheme4
+new_scheme pool1 scheme4
+remove_scheme pool1 scheme4
+new_scheme pool1 scheme4
+
+new_collection pool1 scheme1 col1
+new_collection pool1 scheme1 col2
+new_collection pool1 scheme1 col3
+new_collection pool1 scheme1 col3
+remove_collection pool1 scheme1 col3
+new_collection pool1 scheme1 col3
+
+insert pool1 scheme1 col1 surname name group 8 math 5 rus 4 end
 read_value pool scheme collection surname 1 01.02.2022-23:23:23
