@@ -145,14 +145,16 @@ std::optional<std::string>
 Client::insert(const std::string &pool_name,
                const std::string &scheme_name,
                const std::string &collection_name,
-               const json &student)
+               const std::string &student)
 {
     httplib::Params params;
 
     params.emplace("pool_name", pool_name);
     params.emplace("scheme_name", scheme_name);
     params.emplace("collection_name", collection_name);
-    params.emplace("data", to_string(student));
+    params.emplace("data", student);
+
+    httplib::Headers headers;
 
     auto res = _client.Get("/insert", params, httplib::Headers());
 
@@ -162,7 +164,6 @@ Client::insert(const std::string &pool_name,
     }
     return {};
 }
-
 std::optional<std::string>
 Client::remove(const std::string &pool_name,
                const std::string &scheme_name,
@@ -554,7 +555,6 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                 continue;
             }
             std::string student = get_new_student(cin, cout);
-            cout << student << std::endl;
             std::optional<std::string> response = insert(arg, arg2, arg3, student);
 
             if (!response.has_value())

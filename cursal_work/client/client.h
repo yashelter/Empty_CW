@@ -68,7 +68,7 @@ private:
     std::optional<std::string> insert(const std::string& pool_name,
                                           const std::string& scheme_name,
                                           const std::string& collection_name,
-                                          const json &student);
+                                          const std::string &student);
 
     std::optional<std::string> update(const std::string& pool_name,
                                       const std::string& scheme_name,

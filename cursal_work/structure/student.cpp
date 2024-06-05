@@ -115,13 +115,7 @@ student student::from_json(const nlohmann::json &json)
     json.at("surname").get_to(res._surname);
     json.at("name").get_to(res._name);
     json.at("group").get_to(res._group);
-
-    auto course = json.find("course");
-
-    if (course == json.end() || !course->is_number_integer())
-        throw std::runtime_error("Incorrect json  course for parsing student");
-
-    res._course = course->get<int>();
+    json.at("course").get_to(res._course);
 
     auto subjects = json.find("subjects");
 
@@ -146,9 +140,9 @@ nlohmann::json student::to_json() const
 {
     nlohmann::json res;
 
-    res["surname"] = _surname;
-    res["name"] = _name;
-    res["group"] = _group;
+    res["surname"] = _surname.to_string();
+    res["name"] = _name.to_string();
+    res["group"] = _group.to_string();
     res["course"] = _course;
 
     nlohmann::json arr;
@@ -156,7 +150,7 @@ nlohmann::json student::to_json() const
     for(auto& pair: _subjects)
     {
         nlohmann::json tmp;
-        tmp["subject"] = pair.first.to_json();
+        tmp["subject"] = pair.first.to_string();
         tmp["mark"] = pair.second;
 
         arr.push_back(tmp);

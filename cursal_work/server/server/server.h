@@ -36,8 +36,6 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
     CROW_ROUTE(app, "/add_pool") ([&](const crow::request &req) {
         auto pool_name = req.url_params.get("pool_name");
-        CW_GUID result = _controller->add_pool(pool_name);
-
         return crow::response(200, to_string(result.to_json()));
     });
 
@@ -89,7 +87,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                                     auto scheme_name = req.url_params.get("scheme_name");
                                     auto collection_name = req.url_params.get("collection_name");
 
-                                    auto data_json = req.url_params.get("data");
+                                    std::string data_json = req.url_params.get("data");
 
                                     json data = json::parse(data_json);
 
