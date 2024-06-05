@@ -108,7 +108,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                                         auto need_persist = req.url_params.get("need_persist");
                                         auto time_str = req.url_params.get("time");
                                         auto key = req.url_params.get("key");
-                                        //using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
+
                                         typename controller_int<tkey, tvalue>::time_point_t time;
                                         if (!time_str){
                                             auto val = std::chrono::system_clock::from_time_t(std::stoll(time_str)); // TODO

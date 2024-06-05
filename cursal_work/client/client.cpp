@@ -224,7 +224,7 @@ std::optional<std::string> Client::read_value(const std::string &pool_name,
     params.emplace("collection_name", collection_name);
     params.emplace("key", key);
     params.emplace("need_persist", std::to_string(need_persist));
-    params.emplace("time_point", std::to_string(time));
+    params.emplace("time", std::to_string(time));
 
     auto res = _client.Get("/read_value", params, httplib::Headers());
 
@@ -252,7 +252,7 @@ std::optional<std::string> Client::read_range(const std::string &pool_name,
     params.emplace("lower", up);
     params.emplace("upper", down);
     params.emplace("need_persist", std::to_string(need_persist));
-    params.emplace("time_point", std::to_string(time));
+    params.emplace("time", std::to_string(time));
 
     auto res = _client.Get("/read_range", params, httplib::Headers());
 
