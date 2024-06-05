@@ -5,8 +5,12 @@
 #include <string>
 
 
-int main(int argc, char* argv[])
+int main()
 {
+    int argc = 4;
+    char* argv[] = {"", "C:\\Users\\yashelter\\Desktop\\coursework\\cmake-build-debug\\cursal_work\\server\\cw_server.exe",
+                    "memory", "9030"};
+
 	if (argc != 4)
 	{
 		std::cerr << "Usage: " << argv[0] << " <server_path> <controller_type> <port>" << std::endl;
@@ -33,8 +37,8 @@ int main(int argc, char* argv[])
 	}
 
 	Heart heart(server_path, port, controller_type);
-	heart.start();
-	// Как остановить (закончить работу)
+	heart.start();  // launch in enother thread
+    // cin - when enter - stop
 	heart.stop();
 	return 0;
 }
