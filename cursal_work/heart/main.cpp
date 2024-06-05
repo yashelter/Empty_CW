@@ -9,14 +9,25 @@
 #include <sys/wait.h>
 #include <iostream>
 #include <string>
+#include <filesystem>
 
-/*int main()
+int main(int argc, char* argv[])
 {
-    std::string path = "C:\\Program Files (x86)\\Graph\\graph.exe";
+	if (argc < 2)
+	{
+		std::cerr << "Please provide the path to the executable as an argument" << std::endl;
+		return 1;
+	}
 
-    process::launchProcess(path, "");
-}*/
+	std::string path(argv[1]); // maybe need an absolute path?
 
+	process::launchProcess(path, "");
+
+	return 0;
+}
+
+
+/*
 int main() {
     process proc;
 
@@ -44,3 +55,4 @@ int main() {
 
     return 0;
 }
+*/
