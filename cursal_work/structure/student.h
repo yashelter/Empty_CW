@@ -22,7 +22,7 @@ public:
     cw_string &operator=(std::string &&other);
 
     static std::mutex file_mut;
-    constexpr static std::string path = "strings.str";
+	constexpr static const char* path = "strings.str";
 
     void serialize(std::fstream& stream) const;
     size_t serialize_size() const noexcept;

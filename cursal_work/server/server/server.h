@@ -112,11 +112,9 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                                         //using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
                                         typename controller_int<tkey, tvalue>::time_point_t time;
                                         if (!time_str){
-                                            auto val = std::chrono::system_clock::from_time_t(std::stoll(time_str)); // TODO
-                                            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+                                            time = std::chrono::system_clock::from_time_t(std::stoll(time_str)); // TODO
                                         } else {
-                                            auto val = std::chrono::system_clock::now();
-                                            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+                                            time = std::chrono::system_clock::now();
                                         }
 
                                         CW_GUID result = _controller->read_value(pool_name, scheme_name, collection_name, tkey(key), need_persist - '0', time);
@@ -137,12 +135,10 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
         if (!time_str)
         {
-            auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
-            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+            time = std::chrono::system_clock::from_time_t(std::stoll(time_str));
 
         } else {
-            auto val = std::chrono::system_clock::now();
-            time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
+            time = std::chrono::system_clock::now();
         }
 
         CW_GUID result = _controller->read_range(pool_name, scheme_name, collection_name, lower_key, upper_key, need_persist - '0', time);
@@ -152,21 +148,21 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
     });
 
     CROW_ROUTE(app, "/update") ([&](const crow::request &req)
-                                {
-                                    auto pool_name = req.url_params.get("pool_name");
-                                    auto scheme_name = req.url_params.get("scheme_name");
-                                    auto collection_name = req.url_params.get("collection_name");
+	{
+		auto pool_name = req.url_params.get("pool_name");
+		auto scheme_name = req.url_params.get("scheme_name");
+		auto collection_name = req.url_params.get("collection_name");
 
-                                    auto data_json = req.url_params.get("data");
+		auto data_json = req.url_params.get("data");
 
-                                    json data = json::parse(data_json);
+		json data = json::parse(data_json);
 
-                                    student value =  student::from_json(data);
+		student value =  student::from_json(data);
 
-                                    CW_GUID result = _controller->update(pool_name, scheme_name, collection_name, value._surname, value);
+		CW_GUID result = _controller->update(pool_name, scheme_name, collection_name, value._surname, value);
 
-                                    return crow::response(200, to_string(result.to_json()));
-                                });
+		return crow::response(200, to_string(result.to_json()));
+	});
 
     CROW_ROUTE(app, "/remove") ([&](const crow::request &req) {
         auto pool_name = req.url_params.get("pool_name");
