@@ -441,6 +441,11 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                     cout << "Enter date in format %d.%m.%Y-%H:%M:%S> (numbers with symbols) >>  ";
                     cin >> line;
                     time = input_time(line);
+
+                    std::chrono::time_point<std::chrono::system_clock> x = (std::chrono::system_clock::from_time_t(time));
+                    std::cout << time << " " << (std::chrono::system_clock::from_time_t(time) < std::chrono::system_clock::now()) << " ";
+                    std::cout << x << std::endl;
+
                 } while (time == 0);
             }
 
