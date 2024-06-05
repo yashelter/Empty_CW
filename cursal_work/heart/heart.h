@@ -1,13 +1,11 @@
-//
-// Created by Des Caldnd on 6/3/2024.
-//
-
 #ifndef MP_OS_HEART_H
 #define MP_OS_HEART_H
 
 #include "../client/client.h"
 #include "../launcher/launcher.h"
 #include <httplib.h>
+#include <thread>
+#include <stop_token>
 
 class Heart
 {
@@ -23,7 +21,7 @@ public:
 
 private:
 
-	void monitor_our_server();
+	void monitor_our_server(std::stop_token stoken);
 
 	bool check_server();
 
@@ -37,12 +35,13 @@ private:
 
 	std::string url_;
 
-	std::thread monitor_thread_;
+	std::jthread monitor_thread_;
 
-	bool is_running;
+	std::atomic<bool> is_running;
 
 	process::process_handle_t server_process_;
+
+	Client client_;
 };
 
-
-#endif //MP_OS_HEART_H
+#endif // MP_OS_HEART_H
