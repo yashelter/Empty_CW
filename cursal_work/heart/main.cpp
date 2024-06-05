@@ -11,48 +11,62 @@
 #include <string>
 #include <filesystem>
 
+#include "../server/in_memory/controller/memory_controller.h"
+#include "../structure/student.h"
+#include "server_logger_builder.h"
+#include "../server/interfaces/controller_int.h"
+#include "../../allocator/allocator_global_heap/include/allocator_global_heap.h"
+
 int main(int argc, char* argv[])
 {
-	if (argc < 2)
+	if (argc != 4)
 	{
-		std::cerr << "Please provide the path to the executable as an argument" << std::endl;
+		std::cerr << "Usage: " << argv[0] << " <server_path> <controller_type> <port>" << std::endl;
 		return 1;
 	}
 
-	std::string path(argv[1]); // maybe need an absolute path?
+	char* server_path = argv[1];
+	char* controller_type = argv[2];
 
-	process::launchProcess(path, "");
+	uint16_t port;
+	try
+	{
+		port = std::stoul(argv[3]);
+	}
+	catch (const std::invalid_argument& e)
+	{
+		std::cerr << "Invalid port number: " << argv[3] << std::endl;
+		return 1;
+	}
+	catch (const std::out_of_range& e)
+	{
+		std::cerr << "Port number out of range: " << argv[3] << std::endl;
+		return 1;
+	}
 
+	server_logger_builder builder;
+	controller_int<cw_string, student>* controller;
+	auto allocator = std::make_unique<allocator_global_heap>(nullptr);
+	std::unique_ptr<logger> logger(builder.build());
+	auto comparer = std::less<cw_string>();
+
+	if (strcmp(controller_type, "memory") == 0)
+	{
+		controller = new memory_controller<cw_string, student>(comparer, allocator.get(), logger.get());
+	}
+	else if (strcmp(controller_type, "disk") == 0)
+	{
+		controller = new disk_controller<cw_string, student>("database", logger.get());
+	}
+	else
+	{
+		std::cerr << "Invalid controller type: " << controller_type << std::endl;
+		return 1;
+	}
+
+	Heart heart(server_path, port, controller_type);
+	heart.start();
+	// Как остановить (закончить работу)
+	heart.stop();
 	return 0;
 }
-
-
-/*
-int main() {
-    process proc;
-
-    std::string command1 = "ls";
-    char * arg[] = {"-l"};
-
-    pid_t pid1 = proc.launchProcess(command1, arg);
-
-    if (pid1 > 0) {
-        std::cout << "Child process ID for test 1: " << pid1 << std::endl;
-
-        int exit_status1 = proc.waitForProcess(pid1);
-        if (exit_status1 >= 0) {
-            std::cout << "Test 1 child process exited with status: " << exit_status1 << std::endl;
-        } else {
-            std::cerr << "Error waiting for test 1 child process" << std::endl;
-        }
-    } else if (pid1 == 0) {
-        std::cerr << "Unexpected behavior: main function is running in the child process" << std::endl;
-        exit(EXIT_FAILURE);
-    } else {
-        std::cerr << "Failed to launch child process in test 1" << std::endl;
-    }
-
-
-    return 0;
-}
-*/
