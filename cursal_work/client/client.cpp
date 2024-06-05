@@ -15,11 +15,12 @@ const std::regex Client::_add_collection_reg("add_collection", std::regex_consta
 const std::regex Client::_remove_collection_reg("remove_collection  ", std::regex_constants::icase | std::regex_constants::optimize);
 
 const std::regex Client::_insert_reg("insert", std::regex_constants::icase | std::regex_constants::optimize);
+const std::regex Client::_remove_reg("remove", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_read_value_reg("read_value", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_read_range_reg("read_range", std::regex_constants::icase | std::regex_constants::optimize);
 const std::regex Client::_update_reg("update", std::regex_constants::icase | std::regex_constants::optimize);
 
-const std::regex Client::_all_num_reg("^[A-Za-z0-9]+$", std::regex_constants::optimize);
+const std::regex Client::_all_num_reg("^[A-Za-z]+[A-Za-z0-9]*$", std::regex_constants::optimize);
 
 Client::Client(const std::string& destination) : _client(destination)
 {
@@ -27,7 +28,6 @@ Client::Client(const std::string& destination) : _client(destination)
 }
 std::optional<std::string> Client::get(const std::string &guid)
 {
-    std::cout << guid << std::endl;
     httplib::Params params;
     params.emplace("GUID", guid);
 
@@ -47,13 +47,11 @@ std::optional<std::string> Client::add_pool(const std::string &pool_name)
     params.emplace("pool_name", pool_name);
 
     auto res = _client.Get("/add_pool", params, httplib::Headers());
-
     if (res && res->status == 200)
     {
         std::cout << res->body << std::endl;
         return std::optional<std::string> {res->body};
     }
-
     return {};
 }
 
@@ -170,14 +168,14 @@ std::optional<std::string>
 Client::remove(const std::string &pool_name,
                const std::string &scheme_name,
                const std::string &collection_name,
-               const std::string &student)
+               const std::string &surname)
 {
     httplib::Params params;
 
     params.emplace("pool_name", pool_name);
     params.emplace("scheme_name", scheme_name);
     params.emplace("collection_name", collection_name);
-    params.emplace("data", student);
+    params.emplace("data", surname);
 
     auto res = _client.Get("/remove", params, httplib::Headers());
 
@@ -464,7 +462,109 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
             get_answer_from_server(cin, cout, response.value(),&simple_parse);
             // TODO: parse answer
         }
-        // TODO: read value, read range, update
+        else if (std::regex_match(command, _read_range_reg))
+        {
+            std::string arg2, arg3, arg4, arg5;
+            cin >> arg >> arg2 >> arg3 >> arg4 >> arg5;
+            if (!std::regex_match(arg, _all_num_reg) || !std::regex_match(arg2, _all_num_reg) ||
+                !std::regex_match(arg3, _all_num_reg) || !std::regex_match(arg4, _all_num_reg) || !std::regex_match(arg5, _all_num_reg))
+            {
+                cout << invalid_param << std::endl;
+                continue;
+            }
+            bool need_persist = false;
+            cout << "Do you want look old data: 0-No, 1-Yes >> ";
+            cin >> need_persist;
+            std::time_t time = 0;
+
+            if (need_persist)
+            {
+                std::string line;
+                do
+                {
+                    cout << "Enter date in format %d.%m.%Y-%H:%M:%S> (numbers with symbols) >>  ";
+                    cin >> line;
+                    time = input_time(line);
+                } while (time == 0);
+            }
+
+            std::optional<std::string> response = read_range(arg, arg2, arg3, arg4,arg5,
+                                                             need_persist,
+                                                             need_persist ? time :std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+
+            if (!response.has_value())
+            {
+                cout << std::endl;
+                cout << "Failed while sent message\n";
+                continue;
+            }
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
+            // TODO: parse answer
+        }
+        else if (std::regex_match(command, _update_reg))
+        {
+            std::string arg2, arg3;
+            cin >> arg >> arg2 >> arg3;
+            if (!std::regex_match(arg, _all_num_reg) || !std::regex_match(arg2, _all_num_reg) ||
+                !std::regex_match(arg3, _all_num_reg))
+            {
+                cout << invalid_param << std::endl;
+                continue;
+            }
+            std::string stud = get_new_student(cin, cout);
+
+            std::optional<std::string> response = update(arg, arg2, arg3, stud);
+
+            if (!response.has_value())
+            {
+                cout << std::endl;
+                cout << "Failed while sent message\n";
+                continue;
+            }
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
+        }
+        else if (std::regex_match(command, _remove_reg))
+        {
+            std::string arg2, arg3, surname;
+            cin >> arg >> arg2 >> arg3 >> surname;
+            if (!std::regex_match(arg, _all_num_reg) || !std::regex_match(arg2, _all_num_reg) ||
+                !std::regex_match(arg3, _all_num_reg) || !std::regex_match(surname, _all_num_reg))
+            {
+                cout << invalid_param << std::endl;
+                continue;
+            }
+
+            std::optional<std::string> response = remove(arg, arg2, arg3, surname);
+
+            if (!response.has_value())
+            {
+                cout << std::endl;
+                cout << "Failed while sent message\n";
+                continue;
+            }
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
+        }
+        else if (std::regex_match(command, _insert_reg))
+        {
+            std::string arg2, arg3;
+            cin >> arg >> arg2 >> arg3;
+            if (!std::regex_match(arg, _all_num_reg) || !std::regex_match(arg2, _all_num_reg) ||
+                !std::regex_match(arg3, _all_num_reg))
+            {
+                cout << invalid_param << std::endl;
+                continue;
+            }
+            std::string student = get_new_student(cin, cout);
+            std::optional<std::string> response = insert(arg, arg2, arg3, student);
+
+            if (!response.has_value())
+            {
+                cout << std::endl;
+                cout << "Failed while sent message\n";
+                continue;
+            }
+            get_answer_from_server(cin, cout, response.value(),&simple_parse);
+        }
         else if (std::regex_match(command, _exit_reg))
         {
             cout << "Stopping Client App" << std::endl;
@@ -577,6 +677,7 @@ std::time_t Client::input_time(const std::string& line)
 
 void Client::simple_parse(std::ostream &cout, std::string &line)
 {
-    cout << "Here";
-    cout << line << std::endl;
+    json js = json::parse(line);
+    cout << std::setw(4) << js<< std::endl;
+
 }
