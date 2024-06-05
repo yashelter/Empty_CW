@@ -530,6 +530,8 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::insert(std::string pool_nam
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
 std::optional<nlohmann::json> memory_controller<tkey, tvalue, compare, t>::get(CW_GUID id)
 {
+    std::cout << id << std::endl;
+
     std::lock_guard lock(_map_mut);
 
     auto it = _request_result.find(id);
@@ -751,6 +753,8 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::add_pool(std::string pool_n
         nlohmann::json j;
 
         j["message"] = fut.get();
+
+        std::cout <<  id << " " << j["message"] << std::endl;
 
         std::lock_guard lock(_map_mut);
 
