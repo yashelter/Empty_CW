@@ -183,9 +183,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
     {
         std::string body = req.url_params.get("GUID");
         json jsn = json::parse(body);
-
-        auto ids =  to_string(jsn["id"]);
-        CW_GUID id = CW_GUID(ids);
+        CW_GUID id = CW_GUID(jsn);
 
         std::optional<nlohmann::json> result = _controller->get(id);
         if (result)

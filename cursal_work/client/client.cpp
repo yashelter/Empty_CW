@@ -27,6 +27,7 @@ Client::Client(const std::string& destination) : _client(destination)
 }
 std::optional<std::string> Client::get(const std::string &guid)
 {
+    std::cout << guid << std::endl;
     httplib::Params params;
     params.emplace("GUID", guid);
 
@@ -330,7 +331,7 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                cout << "Failed while sent message\n";
                continue;
            }
-           get_answer_from_server(cin, cout, response.value(),&simple_parse);
+           get_answer_from_server(cin, cout, response.value(), &simple_parse);
            // TODO: parse answer
         }
         else if (std::regex_match(command, _remove_pool_reg))
