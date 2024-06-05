@@ -11,7 +11,7 @@ add_executable(
         ../launcher/launcher.h
         main.cpp)
 target_link_libraries(
-        cw_client
+        cw_heart
         PUBLIC
         httplib::httplib)
 target_link_libraries(

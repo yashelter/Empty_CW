@@ -68,12 +68,12 @@ private:
     std::optional<std::string> insert(const std::string& pool_name,
                                           const std::string& scheme_name,
                                           const std::string& collection_name,
-                                          const json &student);
+                                          const std::string &student);
 
     std::optional<std::string> update(const std::string& pool_name,
                                       const std::string& scheme_name,
                                       const std::string& collection_name,
-                                      const json &student);
+                                      const std::string &student);
 
     std::optional<std::string> remove(const std::string& pool_name,
                                       const std::string& scheme_name,
@@ -103,6 +103,8 @@ private:
                                 void (*function)(std::ostream&, std::string&));
     static std::string get_new_student(std::istream& cin, std::ostream& cout);
     static void simple_parse(std::ostream& cout, std::string& line);
+    static void parse_message(std::ostream& cout, std::string& line);
+    static void parse_student(std::ostream& cout, std::string& line);
 
 public:
 
