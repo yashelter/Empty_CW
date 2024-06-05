@@ -1,7 +1,3 @@
-//
-// Created by Des Caldnd on 6/2/2024.
-//
-
 #ifndef MP_OS_MEMORY_CONTROLLER_H
 #define MP_OS_MEMORY_CONTROLLER_H
 
@@ -259,6 +255,8 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_value(std::string pool
 
     boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name, key, need_persist, time](){
 
+        std::cout << pool_name << " " << scheme_name << " " << collection_name << " " << key << " " << need_persist << " " << time << std::endl;
+
         if (need_persist)
         {
             nlohmann::json res;
@@ -311,6 +309,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_value(std::string pool
                 return res;
             }
 
+            std::cout << it->second.to_json().dump() << std::endl;
             res["data"] = it->second.to_json();
 
             return res;
@@ -359,6 +358,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_value(std::string pool
                 return res;
             }
 
+            std::cout << it->second.to_json().dump() << std::endl;
             res["data"] = it->second.to_json();
 
             return res;
