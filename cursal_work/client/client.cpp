@@ -677,25 +677,35 @@ std::time_t Client::input_time(const std::string& line)
 void Client::simple_parse(std::ostream &cout, std::string &line)
 {
     json js = json::parse(line);
-    cout << std::setw(4) << js<< std::endl;
-
+    cout <<  std::endl << std::setw(4) << js<< std::endl;
 }
 
 void Client::parse_message(std::ostream &cout, std::string &line)
 {
     json js = json::parse(line);
-    std::string str = js["message"].template get<std::string>();;
-    cout << str << std::endl;
+    try
+    {
+        std::string str = js["message"].template get<std::string>();;
+        cout << std::endl << str << std::endl;
+    }catch (const std::exception &e)
+    {
+        simple_parse(cout, line);
+    }
+
 }
 
 void Client::parse_student(std::ostream &cout, std::string &line)
 {
-    simple_parse(cout, line);
     json js = json::parse(line);
-    std::cout << "here";
-    auto str = js["data"].template get<std::string>(); // read_value pool1 scheme1 col1 Skywalker 0
-    std::cout << "here";
-    student stud = student::from_json(json::parse(str));
-    cout << stud.to_string() << std::endl;
+    try
+    {
+        json data = js["data"]; // read_value pool1 scheme1 col1 Skywalker 0
+        student stud = student::from_json(data);
+
+        cout << std::endl << stud.to_string() << std::endl;
+    }catch (const std::exception &e)
+    {
+        parse_message(cout, line);
+    }
 }
 
