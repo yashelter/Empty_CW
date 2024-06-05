@@ -19,7 +19,7 @@ public:
     {
         Async, Waiting
     };
-    ResponseStrategy response_strategy;
+    ResponseStrategy response_strategy = Waiting;
 private:
     mutable httplib::Client _client;
 

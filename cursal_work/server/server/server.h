@@ -37,15 +37,15 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
     CROW_ROUTE(app, "/add_pool") ([&](const crow::request &req) {
         auto pool_name = req.url_params.get("pool_name");
         CW_GUID result = _controller->add_pool(pool_name);
-        
-        return crow::response(200, result.to_json());
+
+        return crow::response(200, to_string(result.to_json()));
     });
 
     CROW_ROUTE(app, "/remove_pool") ([&](const crow::request &req) {
         auto pool_name = req.url_params.get("pool_name");
         CW_GUID result = _controller->remove_pool(pool_name);
 
-        return crow::response(200, result.to_json());
+        return crow::response(200, to_string(result.to_json()));
     });
 
     CROW_ROUTE(app, "/add_scheme") ([&](const crow::request &req) {
@@ -53,7 +53,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
         auto scheme_name = req.url_params.get("scheme_name");
         CW_GUID result = _controller->add_scheme(pool_name, scheme_name);
 
-        return crow::response(200, result.to_json());
+        return crow::response(200, to_string(result.to_json()));
     });
 
     CROW_ROUTE(app, "/remove_scheme") ([&](const crow::request &req) {
@@ -61,7 +61,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
         auto scheme_name = req.url_params.get("scheme_name");
         CW_GUID result = _controller->add_scheme(pool_name, scheme_name);
 
-        return crow::response(200, result.to_json());
+        return crow::response(200, to_string(result.to_json()));
     });
 
     CROW_ROUTE(app, "/add_collection") ([&](const crow::request &req) {
@@ -70,7 +70,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
         auto collection_name = req.url_params.get("collection_name");
         CW_GUID result = _controller->add_collection(pool_name, scheme_name, collection_name);
 
-        return crow::response(200, result.to_json());
+        return crow::response(200, to_string(result.to_json()));
     });
 
     CROW_ROUTE(app, "/remove_collection") ([&](const crow::request &req) {
@@ -80,7 +80,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
         CW_GUID result = _controller->remove_collection(pool_name, scheme_name, collection_name);
 
-        return crow::response(200, result.to_json());
+        return crow::response(200, to_string(result.to_json()));
     });
 
     CROW_ROUTE(app, "/insert") ([&](const crow::request &req)
@@ -91,13 +91,13 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
                                     auto data_json = req.url_params.get("data");
 
-                                    json data = json(data_json);
+                                    json data = json::parse(data_json);
 
                                     student value =  student::from_json(data);
 
                                     CW_GUID result = _controller->insert(pool_name, scheme_name, collection_name, value._surname, value);
 
-                                    return crow::response(200, result.to_json());
+                                    return crow::response(200, to_string(result.to_json()));
                                 });
 
 
@@ -121,7 +121,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
                                         CW_GUID result = _controller->read_value(pool_name, scheme_name, collection_name, tkey(key), need_persist - '0', time);
 
-                                        return crow::response(200, result.to_json()); // TODO
+                                        return crow::response(200, to_string(result.to_json())); // TODO
                                     });
 
     CROW_ROUTE(app, "/read_range") ([&](const crow::request &req) {
@@ -147,7 +147,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
         CW_GUID result = _controller->read_range(pool_name, scheme_name, collection_name, lower_key, upper_key, need_persist - '0', time);
 
-        return crow::response(200, result.to_json()); // TODO
+        return crow::response(200, to_string(result.to_json())); // TODO
 
     });
 
@@ -159,13 +159,13 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
                                     auto data_json = req.url_params.get("data");
 
-                                    json data = json(data_json);
+                                    json data = json::parse(data_json);
 
                                     student value =  student::from_json(data);
 
                                     CW_GUID result = _controller->update(pool_name, scheme_name, collection_name, value._surname, value);
 
-                                    return crow::response(200, result.to_json());
+                                    return crow::response(200, to_string(result.to_json()));
                                 });
 
     CROW_ROUTE(app, "/remove") ([&](const crow::request &req) {
@@ -176,22 +176,27 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
         auto key = req.url_params.get("data");
         CW_GUID result = _controller->remove(pool_name, scheme_name, collection_name, tkey(key));
 
-        return crow::response(200, result.to_json()); // TODO
+        return crow::response(200, to_string(result.to_json())); // TODO
     });
 
-    CROW_ROUTE(app, "/get") ([&](const crow::request &req) {
-        auto body = req.url_params.get("GUID");
-        json jsn = json(body);
-        CW_GUID id = jsn;
+    CROW_ROUTE(app, "/get") ([&](const crow::request &req)
+    {
+        std::string body = req.url_params.get("GUID");
+        json jsn = json::parse(body);
+
+        auto ids =  to_string(jsn["id"]);
+        CW_GUID id = CW_GUID(ids);
 
         std::optional<nlohmann::json> result = _controller->get(id);
-
-        if (result) {
-            return crow::response(200, result.value().dump());
-        } else {
+        if (result)
+        {
+            return crow::response(200, to_string(result.value()));
+        } else
+        {
             return crow::response(404, "Not Found");
         }
     });
+
     std::string ip_address = "127.0.0.1";
     app.bindaddr(ip_address).port(port).multithreaded().run();
     app.run();

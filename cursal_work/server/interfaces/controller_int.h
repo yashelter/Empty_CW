@@ -20,7 +20,7 @@ public:
 
     nlohmann::json to_json() const;
     CW_GUID(nlohmann::json j);
-
+    CW_GUID(std::string j) : xg::Guid(j){};
 };
 
 generator<CW_GUID> guid_sequence();

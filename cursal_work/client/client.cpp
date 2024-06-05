@@ -275,7 +275,7 @@ void Client::get_answer_from_server(std::istream& cin, std::ostream& cout, const
         while (!answer.has_value())
         {
             cout << "Waiting for response...\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             answer = get(guid);
         }
         function(cout, answer.value());
@@ -286,7 +286,7 @@ void Client::get_answer_from_server(std::istream& cin, std::ostream& cout, const
             std::optional<std::string> answer;
             while (!answer.has_value())
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                 answer = get(guid);
             }
             function(cout, answer.value());
@@ -574,5 +574,6 @@ std::time_t Client::input_time(const std::string& line)
 
 void Client::simple_parse(std::ostream &cout, std::string &line)
 {
-    cout << line;
+    cout << "Here";
+    cout << line << std::endl;
 }
