@@ -40,6 +40,7 @@ insert pool1 scheme1 col1 Skywalker Anakin MO211 2 math 5 osi 5 end
 insert pool1 scheme1 col1 Kirigaya Kirito MO211 2 math 2 osi 2 physics 2 end
 
 read_value pool1 scheme1 col1 Skywalker 1 01.01.2000-20:00:00
+read_value pool1 scheme1 col1 Yagami 1 06.06.2024-00:00:00
 
 remove pool1 scheme1 col1 Kirigaya
 read_value pool1 scheme1 col1 Skywalker 0

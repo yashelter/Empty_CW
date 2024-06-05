@@ -113,11 +113,8 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                                         typename controller_int<tkey, tvalue>::time_point_t time;
 
                                         #ifdef WIN32
-                                            auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
-                                            std::cout <<std::stoll(time_str) << std::endl;
+                                            auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str) + 10800);
                                             time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
-                                            std::cout << time << std::endl;
-                                            std::cout <<  std::chrono::system_clock::from_time_t(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
                                         #else
                                             time = std::chrono::system_clock::from_time_t(std::stoll(time_str));
                                         #endif
@@ -143,7 +140,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
         if (!time_str)
         {
             #ifdef WIN32
-                auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
+                auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str) + 10800);
                 time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
             #else
                 time = std::chrono::system_clock::from_time_t(std::stoll(time_str));
