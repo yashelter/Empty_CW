@@ -114,7 +114,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
 
                                         #ifdef WIN32
                                             auto  val = std::chrono::system_clock::from_time_t(std::stoll(time_str));
-                                            std::cout << val << std::endl;
+                                            std::cout <<std::stoll(time_str) << std::endl;
                                             time = std::chrono::clock_cast<std::chrono::utc_clock>(val);
                                             std::cout << time << std::endl;
                                             std::cout <<  std::chrono::system_clock::from_time_t(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
