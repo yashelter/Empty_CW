@@ -216,7 +216,6 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
                              });
 
     std::string ip_address = "127.0.0.1";
-    app.bindaddr(ip_address).port(port).multithreaded();
 }
 
 #endif //MP_OS_SERVER_H
