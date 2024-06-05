@@ -49,6 +49,7 @@ std::optional<std::string> Client::add_pool(const std::string &pool_name)
     auto res = _client.Get("/add_pool", params, httplib::Headers());
     if (res && res->status == 200)
     {
+        std::cout << res->body << std::endl;
         return std::optional<std::string> {res->body};
     }
     return {};
@@ -267,6 +268,7 @@ std::optional<std::string> Client::read_range(const std::string &pool_name,
 void Client::get_answer_from_server(std::istream& cin, std::ostream& cout, const std::string& guid,
                                     void (*function)(std::ostream&, std::string&))
 {
+    std::cout << guid << std::endl;
     if (response_strategy == ResponseStrategy::Waiting)
     {
         auto answer = get(guid);
