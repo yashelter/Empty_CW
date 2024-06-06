@@ -8,12 +8,18 @@ FetchContent_Declare(
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
+find_package(Boost COMPONENTS system thread REQUIRED)
+
 FetchContent_MakeAvailable(
         googletest)
 
 add_executable(
         tree_test
         b_tree.h
+        ../controller/memory_controller.cpp
+        ../controller/memory_controller.h
+        ../../../structure/student.cpp
+        ../../../structure/student.h
         test.cpp)
 target_link_libraries(
         tree_test
@@ -55,3 +61,8 @@ set_target_properties(
         CXX_EXTENSIONS OFF
         VERSION 1.0
         DESCRIPTION "server logger implementation library")
+
+add_custom_command(TARGET tree_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:cw_server> $<TARGET_FILE_DIR:tree_test>
+        COMMAND_EXPAND_LISTS
+        )

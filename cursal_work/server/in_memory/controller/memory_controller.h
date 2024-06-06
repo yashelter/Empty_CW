@@ -69,8 +69,8 @@ public:
     CW_GUID remove_collection(std::string pool_name, std::string scheme_name, std::string collection_name) override;
 
     CW_GUID insert(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) override; // insert if not exist
-    CW_GUID read_value(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) override;
-    CW_GUID read_range(std::string pool_name, std::string scheme_name, std::string collection_name, tkey lower, tkey upper, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) override;
+    CW_GUID read_value(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, bool need_persist, time_point_t time = std::chrono::system_clock::now()) override;
+    CW_GUID read_range(std::string pool_name, std::string scheme_name, std::string collection_name, tkey lower, tkey upper, bool need_persist, time_point_t time = std::chrono::system_clock::now()) override;
     CW_GUID update(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) override; // updates if exist
     CW_GUID remove(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key) override;
 
@@ -235,7 +235,9 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 template<typename collection>
 memory_controller<tkey, tvalue, compare, t>::perst_helper<collection>::~perst_helper()
 {
+    std::cout << "redo" << std::endl;
     _c.redo_all();
+    std::cout << _c.size() << std::endl;
 }
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
@@ -243,6 +245,8 @@ template<typename collection>
 memory_controller<tkey, tvalue, compare, t>::perst_helper<collection>::perst_helper(collection &c,
                                                                                     memory_controller::time_point_t time) : _c(c)
 {
+
+    std::cout << "revert" << std::endl;
     _c.revert_to(time);
 }
 

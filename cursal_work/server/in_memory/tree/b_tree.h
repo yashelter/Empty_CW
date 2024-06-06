@@ -475,7 +475,7 @@ bool B_tree<tkey, tvalue, compare, t>::update(const B_tree::tree_data_type &data
     if (exists(*stack.top().first, ind))
     {
         if (hist)
-            _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
+            _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
         (*stack.top().first)->keys[ind].second = data.second;
         return true;
     } else
@@ -490,7 +490,7 @@ bool B_tree<tkey, tvalue, compare, t>::update(B_tree::tree_data_type &&data, boo
     if (exists(*stack.top().first, ind))
     {
         if (hist)
-            _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
+            _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
         (*stack.top().first)->keys[ind].second = std::move(data.second);
         return true;
     } else
@@ -528,12 +528,15 @@ void B_tree<tkey, tvalue, compare, t>::b_tree_update_operation::undo(B_tree &tre
 template<typename tkey, typename tvalue, compator<tkey> compare, std::size_t t>
 void B_tree<tkey, tvalue, compare, t>::b_tree_insert_operation::redo(B_tree &tree)
 {
+    std::cout << "Insert redo" << std::endl;
     tree.insert(_data, false);
 }
 
 template<typename tkey, typename tvalue, compator<tkey> compare, std::size_t t>
 void B_tree<tkey, tvalue, compare, t>::b_tree_insert_operation::undo(B_tree &tree)
 {
+    std::cout << "Insert undo" << std::endl;
+    _data.second = tree.at(_data.first);
     tree.erase(_data.first, false);
 }
 
@@ -644,7 +647,7 @@ typename B_tree<tkey, tvalue, compare, t>::btree_iterator B_tree<tkey, tvalue, c
 {
 //    check_tree(_root, 0);
     if (hist)
-        _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_remove_operation((*path.top().first)->keys[index]))));
+        _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_remove_operation((*path.top().first)->keys[index]))));
 	--_size;
 	if (!is_terminate_node(*path.top().first))
 	{
@@ -832,7 +835,7 @@ typename B_tree<tkey, tvalue, compare, t>::btree_iterator B_tree<tkey, tvalue, c
 
 //    check_tree(_root, 0);
     if (hist)
-        _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_insert_operation(unmove(data)))));
+        _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_insert_operation(unmove(data)))));
 	++_size;
 	if (_root == nullptr)
 	{
@@ -1964,6 +1967,7 @@ B_tree<tkey, tvalue, compare, t> &B_tree<tkey, tvalue, compare, t>::operator=(co
 {
     if (this != &other)
     {
+        _allocator = other._allocator;
 		btree_node* tmp = copy_subtree(nullptr, other._root);
 		destroy_subtree(_root);
 		_root = tmp;
