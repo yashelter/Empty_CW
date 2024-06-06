@@ -8,12 +8,12 @@
 #include <stop_token>
 #include <httplib.h>
 
-Heart::Heart(const std::string& server_path, uint16_t port, const std::string& controller_type)
+Heart::Heart(const std::string& server_path, const std::string& port, const std::string& controller_type)
 		: server_path_(server_path), port_(port), controller_type_(controller_type), is_running(false),
-		  client_("http://127.0.0.1:" + std::to_string(port))
+		  client_("http://127.0.0.1:" + port)
 {
-	url_ = "http://127.0.0.1:" + std::to_string(port);
-	server_process_ = process::launchProcess(server_path, std::to_string(port) + " " + controller_type);
+	url_ = "http://127.0.0.1:" + port;
+	server_process_ = process::launchProcess(server_path, controller_type + " " + port);
 }
 
 Heart::~Heart()
@@ -50,5 +50,5 @@ void Heart::restart_server()
 {
 	std::cout << "Restarting server..." << std::endl;
 	process::stopProcess(server_process_);
-	server_process_ = process::launchProcess(server_path_, std::to_string(port_) + " " + controller_type_);
+	server_process_ = process::launchProcess(server_path_, controller_type_ + " " + port_);
 }
