@@ -879,79 +879,80 @@ std::pair<typename B_tree<tkey, tvalue, compare, t>::btree_const_iterator, typen
                                                                                                                                                                                          bool include_lower,
                                                                                                                                                                                          bool include_upper) const
 {
-	if (compare_keys(upper, lower))
-	{
-		throw std::logic_error("Upper key is less then lower");
-	}
-	if (empty())
-	{
-		return std::make_pair(end(), end());
-	}
-	auto [ptr, ind] = find_path(lower);
+    if (compare_keys(upper, lower))
+    {
+        throw std::logic_error("Upper key is less then lower");
+    }
+    if (empty())
+        return std::make_pair(end(), end());
+    auto [ptr, ind] = find_path(lower);
 
-	btree_const_iterator beg(ptr, ind);
+    btree_const_iterator beg(ptr, ind);
 
-	if (!exists(ptr, ind))
-	{
-		auto [in_ind, found] = find_index(lower, ptr);
-		if (in_ind > ptr->size - 1)
-			in_ind = ptr->size - 1;
+    if (!exists(ptr, ind))
+    {
+        auto [in_ind, found] = find_index(lower, *ptr.top().first);
+        if (in_ind > (*ptr.top().first)->size - 1)
+            in_ind = (*ptr.top().first)->size - 1;
 
-		beg._index = in_ind;
-	}
+        beg._index = in_ind;
+    }
 
-	while (beg != end() && compare_keys(beg->first, lower))
-	{
-		++beg;
-	}
+    while (beg != end() && compare_keys(beg->first, lower))
+    {
+        ++beg;
+    }
 
-	if (beg == end())
-		return std::make_pair(end(), end());
+    if (beg == end())
+        return std::make_pair(end(), end());
 
-	bool found_one = false;
+    bool found_one = false;
 
-	if (!compare_keys(lower, beg->first))
-	{
-		if (!include_lower)
-			++beg;
-		else
-			found_one = true;
-	}
+    if (!compare_keys(lower, beg->first))
+    {
+        if (!include_lower)
+            ++beg;
+        else
+            found_one = true;
+    }
 
-	auto [ptr_end, ind_end] = find_path(upper);
+    auto [ptr_end, ind_end] = find_path(upper);
 
-	btree_const_iterator e(ptr_end, ind_end);
+    btree_const_iterator e(ptr_end, ind_end);
 
-	if (!exists(ptr_end, ind_end))
-	{
-		auto [in_ind, found] = find_index(lower, ptr);
-		if (in_ind > ptr->size - 1)
-			in_ind = ptr->size - 1;
+    if (!exists(ptr_end, ind_end))
+    {
+        auto [in_ind, found] = find_index(upper, *ptr.top().first);
+        if (in_ind > (*ptr.top().first)->size - 1)
+        {
+            in_ind = (*ptr.top().first)->size - 1;
+            e._index = in_ind;
+            ++e;
+        } else
+            e._index = in_ind;
+    }
 
-		e._index = in_ind;
-	}
+    while (beg != e && e != end() && compare_keys(upper, e->first))
+    {
+        --e;
+    }
 
-	while (beg != e && compare_keys(upper, e->first))
-	{
-		--e;
-	}
+    if (e != end() && !compare_keys(e->first, upper))
+    {
+        if (!include_upper)
+        {
+            if (beg != e)
+                --e;
+        } else
+        {
+            found_one = true;
+        }
+    }
 
-	if (!compare_keys(e->first, upper))
-	{
-		if (!include_upper)
-		{
-			if (beg != e)
-				--e;
-		} else
-		{
-			found_one = true;
-		}
-	}
+    if (beg != e)
+        found_one = true;
 
-	if (beg != e)
-		found_one = true;
-
-	return std::make_pair(beg, found_one ? ++e : e);
+    return std::make_pair(beg, found_one ? ++e : e);
 }
 
 template<typename tkey, typename tvalue, compator<tkey> compare, std::size_t t>
@@ -960,77 +961,80 @@ std::pair<typename B_tree<tkey, tvalue, compare, t>::btree_iterator, typename B_
                                                                                                                                                                              bool include_lower,
                                                                                                                                                                              bool include_upper)
 {
-	if (compare_keys(upper, lower))
-	{
-		throw std::logic_error("Upper key is less then lower");
-	}
-	if (empty())
-		return std::make_pair(end(), end());
-	auto [ptr, ind] = find_path(lower);
+    if (compare_keys(upper, lower))
+    {
+        throw std::logic_error("Upper key is less then lower");
+    }
+    if (empty())
+        return std::make_pair(end(), end());
+    auto [ptr, ind] = find_path(lower);
 
-	btree_iterator beg(ptr, ind);
+    btree_iterator beg(ptr, ind);
 
-	if (!exists(ptr, ind))
-	{
-		auto [in_ind, found] = find_index(lower, *ptr.top().first);
-		if (in_ind > (*ptr.top().first)->size - 1)
-			in_ind = (*ptr.top().first)->size - 1;
+    if (!exists(ptr, ind))
+    {
+        auto [in_ind, found] = find_index(lower, *ptr.top().first);
+        if (in_ind > (*ptr.top().first)->size - 1)
+            in_ind = (*ptr.top().first)->size - 1;
 
-		beg._index = in_ind;
-	}
+        beg._index = in_ind;
+    }
 
-	while (beg != end() && compare_keys(beg->first, lower))
-	{
-		++beg;
-	}
+    while (beg != end() && compare_keys(beg->first, lower))
+    {
+        ++beg;
+    }
 
-	if (beg == end())
-		return std::make_pair(end(), end());
+    if (beg == end())
+        return std::make_pair(end(), end());
 
-	bool found_one = false;
+    bool found_one = false;
 
-	if (!compare_keys(lower, beg->first))
-	{
-		if (!include_lower)
-			++beg;
-		else
-			found_one = true;
-	}
+    if (!compare_keys(lower, beg->first))
+    {
+        if (!include_lower)
+            ++beg;
+        else
+            found_one = true;
+    }
 
-	auto [ptr_end, ind_end] = find_path(upper);
+    auto [ptr_end, ind_end] = find_path(upper);
 
-	btree_iterator e(ptr_end, ind_end);
+    btree_iterator e(ptr_end, ind_end);
 
-	if (!exists(ptr_end, ind_end))
-	{
-		auto [in_ind, found] = find_index(lower, *ptr.top().first);
-		if (in_ind > (*ptr.top().first)->size - 1)
-			in_ind = (*ptr.top().first)->size - 1;
+    if (!exists(ptr_end, ind_end))
+    {
+        auto [in_ind, found] = find_index(upper, *ptr.top().first);
+        if (in_ind > (*ptr.top().first)->size - 1)
+        {
+            in_ind = (*ptr.top().first)->size - 1;
+            e._index = in_ind;
+            ++e;
+        } else
+            e._index = in_ind;
+    }
 
-		e._index = in_ind;
-	}
+    while (beg != e && e != end() && compare_keys(upper, e->first))
+    {
+        --e;
+    }
 
-	while (beg != e && compare_keys(upper, e->first))
-	{
-		--e;
-	}
+    if (e != end() && !compare_keys(e->first, upper))
+    {
+        if (!include_upper)
+        {
+            if (beg != e)
+                --e;
+        } else
+        {
+            found_one = true;
+        }
+    }
 
-	if (!compare_keys(e->first, upper))
-	{
-		if (!include_upper)
-		{
-			if (beg != e)
-				--e;
-		} else
-		{
-			found_one = true;
-		}
-	}
+    if (beg != e)
+        found_one = true;
 
-	if (beg != e)
-		found_one = true;
-
-	return std::make_pair(beg, found_one ? ++e : e);
+    return std::make_pair(beg, found_one ? ++e : e);
 }
 
 template<typename tkey, typename tvalue, compator<tkey> compare, std::size_t t>
