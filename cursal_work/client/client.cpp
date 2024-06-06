@@ -49,7 +49,7 @@ std::optional<std::string> Client::add_pool(const std::string &pool_name)
     auto res = _client.Get("/add_pool", params, httplib::Headers());
     if (res && res->status == 200)
     {
-        std::cout << res->body << std::endl;
+        //std::cout << res->body << std::endl;
         return std::optional<std::string> {res->body};
     }
     return {};
