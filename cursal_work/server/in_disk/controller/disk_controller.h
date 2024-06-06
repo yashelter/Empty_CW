@@ -186,13 +186,14 @@ private:
 
     class lock_helper
     {
+    public:
         std::unordered_map<std::string, std::pair<bool, size_t>>& _map;
         bool _unique;
         std::string& _path;
         std::mutex& _mut;
         std::condition_variable& _cond_var;
 
-        lock_helper(std::unordered_map<std::string, std::pair<bool, size_t>>& map, bool unique, std::string& path, std::mutex& mut, std::condition_variable& cond_var);
+        lock_helper(std::unordered_map<std::string, std::pair<bool, size_t>>& map, bool unique, std::string path, std::mutex& mut, std::condition_variable& cond_var);
         ~lock_helper() noexcept;
     };
 
@@ -584,7 +585,7 @@ disk_controller<tkey, tvalue, compare, t>::lock_helper::~lock_helper() noexcept
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
 disk_controller<tkey, tvalue, compare, t>::lock_helper::lock_helper(
-        std::unordered_map<std::string, std::pair<bool, size_t>> &map, bool unique, std::string &path, std::mutex &mut,
+        std::unordered_map<std::string, std::pair<bool, size_t>> &map, bool unique, std::string path, std::mutex &mut,
         std::condition_variable &cond_var) : _map(map), _unique(unique), _path(path), _mut(mut), _cond_var(cond_var)
 {
     std::unique_lock lock(mut);
@@ -826,8 +827,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_value(std::string pool_n
                 res["message"] = "Collection does not exist";
                 return res;
             }
+            auto path = (_root / pool_name / scheme_name / (collection_name + ".dat"));
+            std::string crutch = path.string();
 
-            B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+            B_tree_disk<tkey, tvalue, compare, t> tree(crutch, _logger);
 
             if(!tree.is_valid())
             {
@@ -1067,8 +1070,9 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::insert(std::string pool_name,
 {
     CW_GUID id;
 
-    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name, key, value](){
-        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name, key, value]()
+    {
+        lock_helper lock(_opened_dirs_files, true, "", _opened_mutex, _opened_cond_var);
 
         bool res = std::filesystem::exists(_root / pool_name);
 
@@ -1096,7 +1100,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::insert(std::string pool_name,
 
         lock_helper clock(_opened_dirs_files, true, pool_name + '/' + scheme_name + '/' + collection_name, _opened_mutex, _opened_cond_var);
 
-        B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+        auto path = (_root / pool_name / scheme_name / (collection_name + ".dat"));
+        std::string crutch = path.string();
+
+        B_tree_disk<tkey, tvalue, compare, t> tree(crutch, _comparer);
 
         if (!tree.is_valid())
         {
@@ -1136,8 +1143,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::remove_collection(std::string
 {
     CW_GUID id;
 
-    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name](){
-        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name]()
+    {
+        std::string crutch = "";
+        lock_helper lock(_opened_dirs_files, true, crutch, _opened_mutex, _opened_cond_var);
 
         bool res = std::filesystem::exists(_root / pool_name);
 
@@ -1198,8 +1207,9 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::add_collection(std::string po
 {
     CW_GUID id;
 
-    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name](){
-        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+    boost::async(boost::launch::async, [this, pool_name, scheme_name, collection_name]()
+    {
+        lock_helper lock(_opened_dirs_files, true, "", _opened_mutex, _opened_cond_var);
 
         bool res = std::filesystem::exists(_root / pool_name);
 
@@ -1224,8 +1234,9 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::add_collection(std::string po
         {
             return std::string("Collection already exists");
         }
-
-        B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _comparer, _logger);
+        auto path = (_root / pool_name / scheme_name / (collection_name + ".dat"));
+        std::string crutch = path.string();
+        B_tree_disk<tkey, tvalue, compare, t> tree(crutch, _comparer, _logger);
 
         if (tree.is_valid())
         {
@@ -1257,8 +1268,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::remove_scheme(std::string poo
 {
     CW_GUID id;
 
-    boost::async(boost::launch::async, [this, pool_name, scheme_name](){
-        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+    boost::async(boost::launch::async, [this, pool_name, scheme_name]()
+    {
+        std::string crutch = "";
+        lock_helper lock(_opened_dirs_files, true, crutch, _opened_mutex, _opened_cond_var);
 
         bool res = std::filesystem::exists(_root / pool_name);
 
@@ -1304,8 +1317,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::add_scheme(std::string pool_n
 {
     CW_GUID id;
 
-    boost::async(boost::launch::async, [this, pool_name, scheme_name](){
-        lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
+    boost::async(boost::launch::async, [this, pool_name, scheme_name]()
+    {
+        std::string crutch = "";
+        lock_helper lock(_opened_dirs_files, true, crutch, _opened_mutex, _opened_cond_var);
 
         bool res = std::filesystem::exists(_root / pool_name);
 
@@ -1362,8 +1377,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::remove_pool(std::string pool_
 {
     CW_GUID id;
 
-    boost::async(boost::launch::async, [this, pool_name](){
-        lock_helper lock(_opened_dirs_files, true, "", _opened_mutex, _opened_cond_var);
+    boost::async(boost::launch::async, [this, pool_name]()
+    {
+        std::string crutch = "";
+        lock_helper lock(_opened_dirs_files, true, crutch, _opened_mutex, _opened_cond_var);
 
         bool res = std::filesystem::exists(_root / pool_name);
 
@@ -1400,8 +1417,10 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::add_pool(std::string pool_nam
 {
     CW_GUID id;
 
-    boost::async(boost::launch::async, [this, pool_name](){
-        lock_helper lock(_opened_dirs_files, true, "", _opened_mutex, _opened_cond_var);
+    boost::async(boost::launch::async, [this, pool_name]()
+    {
+        std::string crutch = "";
+        lock_helper lock(_opened_dirs_files, true, crutch, _opened_mutex, _opened_cond_var);
 
         bool res = std::filesystem::create_directory(_root / pool_name);
 

@@ -5,7 +5,8 @@
 #include <utility>
 #include <crow.h>
 #include <memory_controller.h>
-//#include <disk_controller.h>
+
+#include <disk_controller.h>
 #include <controller_int.h>
 
 template <serializable tkey, serializable tvalue>

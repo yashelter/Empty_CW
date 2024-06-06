@@ -4,7 +4,7 @@ project(cw_server)
 add_subdirectory(utility_cw)
 add_subdirectory(interfaces)
 add_subdirectory(in_memory)
-#add_subdirectory(in_disk)
+add_subdirectory(in_disk)
 add_subdirectory(server)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-O3")

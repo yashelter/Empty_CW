@@ -1,6 +1,3 @@
-//
-// Created by Des Caldnd on 6/2/2024.
-//
 #include <iostream>
 
 #include <thread>
@@ -53,8 +50,10 @@ int main()
 
 	server_logger_builder builder;
 	controller_int<cw_string, student>* controller;
+
 	auto allocator = std::make_unique<allocator_global_heap>(nullptr);
 	std::unique_ptr<logger> logger(builder.build());
+
 	auto comparer = std::less<cw_string>();
 
 	if (strcmp(controller_type, "memory") == 0)
@@ -63,7 +62,7 @@ int main()
 	}
 	else if (strcmp(controller_type, "disk") == 0)
 	{
-		//controller = new disk_controller<cw_string, student, std::less<cw_string>, 1>("database", logger.get());
+		controller = new disk_controller<cw_string, student>("base");
 	}
 	else
 	{
