@@ -58,7 +58,7 @@ Server<tkey, tvalue>::Server(controller_int<tkey, tvalue>* controller, uint16_t 
     CROW_ROUTE(app, "/remove_scheme") ([&](const crow::request &req) {
         auto pool_name = req.url_params.get("pool_name");
         auto scheme_name = req.url_params.get("scheme_name");
-        CW_GUID result = _controller->add_scheme(pool_name, scheme_name);
+        CW_GUID result = _controller->remove_scheme(pool_name, scheme_name);
 
         return crow::response(200, to_string(result.to_json()));
     });
