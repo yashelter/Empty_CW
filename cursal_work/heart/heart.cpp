@@ -24,13 +24,14 @@ Heart::~Heart()
 void Heart::start()
 {
 	is_running = true;
-    while (is_running)
-    {
-        if (!check_server())
-        {
-            restart_server();
-        }
-    }
+	while (is_running)
+	{
+		if (!check_server())
+		{
+			restart_server();
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
 }
 
 void Heart::stop()
@@ -40,20 +41,9 @@ void Heart::stop()
 	std::cout << "Stopping server process";
 }
 
-void Heart::monitor_our_server(std::stop_token stoken)
-{
-	while (!stoken.stop_requested() && is_running)
-	{
-		if (!check_server()) {
-			restart_server();
-		}
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
-}
-
 bool Heart::check_server()
 {
-    return client_.heart();
+	return client_.heart();
 }
 
 void Heart::restart_server()
