@@ -1,7 +1,3 @@
-//
-// Created by Des Caldnd on 6/3/2024.
-//
-
 #ifndef MP_OS_LAUNCHER_H
 #define MP_OS_LAUNCHER_H
 

@@ -1,6 +1,3 @@
-// Created by Des Caldnd on 6/3/2024.
-//
-
 #include "heart.h"
 #include <iostream>
 #include <unistd.h>

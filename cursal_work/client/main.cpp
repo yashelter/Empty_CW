@@ -3,6 +3,7 @@
 
 int main()
 {
+    std::cout << "hya\n";
     Client client = Client();
     client.start_dialog();
 

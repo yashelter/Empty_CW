@@ -1,6 +1,3 @@
-//
-// Created by Des Caldnd on 6/5/2024.
-//
 #include "b_tree.h"
 #include <iostream>
 #include <gtest/gtest.h>
