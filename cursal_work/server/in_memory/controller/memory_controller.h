@@ -1,7 +1,3 @@
-//
-// Created by Des Caldnd on 6/2/2024.
-//
-
 #ifndef MP_OS_MEMORY_CONTROLLER_H
 #define MP_OS_MEMORY_CONTROLLER_H
 
@@ -73,8 +69,8 @@ public:
     CW_GUID remove_collection(std::string pool_name, std::string scheme_name, std::string collection_name) override;
 
     CW_GUID insert(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) override; // insert if not exist
-    CW_GUID read_value(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) override;
-    CW_GUID read_range(std::string pool_name, std::string scheme_name, std::string collection_name, tkey lower, tkey upper, bool need_persist, time_point_t time = std::chrono::utc_clock::now()) override;
+    CW_GUID read_value(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, bool need_persist, time_point_t time = std::chrono::system_clock::now()) override;
+    CW_GUID read_range(std::string pool_name, std::string scheme_name, std::string collection_name, tkey lower, tkey upper, bool need_persist, time_point_t time = std::chrono::system_clock::now()) override;
     CW_GUID update(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key, tvalue value) override; // updates if exist
     CW_GUID remove(std::string pool_name, std::string scheme_name, std::string collection_name, tkey key) override;
 
@@ -239,7 +235,9 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 template<typename collection>
 memory_controller<tkey, tvalue, compare, t>::perst_helper<collection>::~perst_helper()
 {
+    std::cout << "redo" << std::endl;
     _c.redo_all();
+    std::cout << _c.size() << std::endl;
 }
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
@@ -247,6 +245,8 @@ template<typename collection>
 memory_controller<tkey, tvalue, compare, t>::perst_helper<collection>::perst_helper(collection &c,
                                                                                     memory_controller::time_point_t time) : _c(c)
 {
+
+    std::cout << "revert" << std::endl;
     _c.revert_to(time);
 }
 
@@ -258,6 +258,8 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_value(std::string pool
     CW_GUID id;
 
     boost::async(boost::launch::async, [this, id, pool_name, scheme_name, collection_name, key, need_persist, time](){
+
+        std::cout << pool_name << " " << scheme_name << " " << collection_name << " " << key << " " << need_persist << " " << time << std::endl;
 
         if (need_persist)
         {
@@ -311,6 +313,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_value(std::string pool
                 return res;
             }
 
+            std::cout << it->second.to_json().dump() << std::endl;
             res["data"] = it->second.to_json();
 
             return res;
@@ -359,6 +362,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::read_value(std::string pool
                 return res;
             }
 
+            std::cout << it->second.to_json().dump() << std::endl;
             res["data"] = it->second.to_json();
 
             return res;
@@ -408,7 +412,7 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::update(std::string pool_nam
         if (it == coll_it->second.end())
             return std::string("Data with such key does not exist");
 
-        it->second = value;
+        coll_it->second.update(std::make_pair(key, value));
 
         return std::string("Data updated");
 
@@ -530,6 +534,8 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::insert(std::string pool_nam
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
 std::optional<nlohmann::json> memory_controller<tkey, tvalue, compare, t>::get(CW_GUID id)
 {
+    std::cout << id << std::endl;
+
     std::lock_guard lock(_map_mut);
 
     auto it = _request_result.find(id);
@@ -751,6 +757,8 @@ CW_GUID memory_controller<tkey, tvalue, compare, t>::add_pool(std::string pool_n
         nlohmann::json j;
 
         j["message"] = fut.get();
+
+        std::cout <<  id << " " << j["message"] << std::endl;
 
         std::lock_guard lock(_map_mut);
 

@@ -21,10 +21,10 @@ target_link_libraries(
         cw_server_lib
         PUBLIC
         cw_memory)
-target_link_libraries(
-        cw_server_lib
-        PUBLIC
-        cw_disk)
+#target_link_libraries(
+  #      cw_server_lib
+ #       PUBLIC
+ #       cw_disk)
 target_link_libraries(
         cw_server_lib
         PUBLIC

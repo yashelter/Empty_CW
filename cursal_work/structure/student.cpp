@@ -12,17 +12,51 @@ void cw_string::serialize(std::fstream &stream) const
     {
         std::lock_guard lock(file_mut);
 
-        std::fstream real_file(path, std::ios_base::app | std::ios_base::binary | std::ios::out);
+        std::fstream real_file(path, std::ios_base::app | std::ios_base::binary);
 
         if (!real_file.is_open())
             throw std::runtime_error("File for cw_string serialisation could not be opened");
 
         position = real_file.tellg();
 
-        size_t length = size();
+        real_file.seekg(0, std::ios_base::beg);
 
-        real_file.write(reinterpret_cast<char *>(&length), sizeof(size_t));
-        real_file.write(c_str(), length * sizeof(char));
+        bool need_write = true;
+
+        while(real_file.tellg() < position && need_write)
+        {
+            size_t pos = real_file.tellg();
+            size_t length;
+
+            real_file.read(reinterpret_cast<char*>(&length), sizeof(size_t));
+
+            if(length != size())
+            {
+                real_file.seekg(length, std::ios_base::cur);
+                continue;
+            }
+
+            std::string str;
+            str.resize(length);
+
+            real_file.read(str.data(), length * sizeof(char));
+
+            if (*this == str)
+            {
+                need_write = false;
+                position = pos;
+            }
+        }
+
+        real_file.seekg(position);
+
+        if (need_write)
+        {
+            size_t length = size();
+
+            real_file.write(reinterpret_cast<char *>(&length), sizeof(size_t));
+            real_file.write(c_str(), length * sizeof(char));
+        }
     }
 
     stream.write(reinterpret_cast<char *>(&position), sizeof(size_t));
@@ -112,50 +146,24 @@ student student::from_json(const nlohmann::json &json)
 {
     student res;
 
-    auto surname = json.find("surname");
-
-    if (surname == json.end() || !surname->is_string())
-        throw std::runtime_error("Incorrect json for parsing student");
-
-    res._surname = nlohmann::to_string(*surname);
-
-    auto name = json.find("name");
-
-    if (name == json.end() || !name->is_string())
-        throw std::runtime_error("Incorrect json for parsing student");
-
-    res._name = nlohmann::to_string(*name);
-
-    auto group = json.find("group");
-
-    if (group == json.end() || !group->is_string())
-        throw std::runtime_error("Incorrect json for parsing student");
-
-    res._group = nlohmann::to_string(*group);
-
-    auto course = json.find("course");
-
-    if (course == json.end() || !course->is_number_integer())
-        throw std::runtime_error("Incorrect json for parsing student");
-
-    res._course = course->get<int>();
+    json.at("surname").get_to(res._surname);
+    json.at("name").get_to(res._name);
+    json.at("group").get_to(res._group);
+    json.at("course").get_to(res._course);
 
     auto subjects = json.find("subjects");
 
     if (subjects == json.end() || !subjects->is_array())
-        throw std::runtime_error("Incorrect json for parsing student");
+        throw std::runtime_error("Incorrect json subjects for parsing student");
 
     for(auto& j: *subjects)
     {
         auto n = j.find("subject");
         auto m = j.find("mark");
 
-        if (n == j.end() || m == j.end() || !n->is_string() || !m->is_number_integer())
-            throw std::runtime_error("Incorrect json for parsing student");
+        res._subjects.emplace_back(n->get<std::string>(), m->get<int>());
 
-        res._subjects.emplace_back(nlohmann::to_string(*n), m->get<int>());
     }
-
     return res;
 }
 
@@ -163,9 +171,9 @@ nlohmann::json student::to_json() const
 {
     nlohmann::json res;
 
-    res["surname"] = _surname.to_json();
-    res["name"] = _name.to_json();
-    res["group"] = _group.to_json();
+    res["surname"] = _surname.to_string();
+    res["name"] = _name.to_string();
+    res["group"] = _group.to_string();
     res["course"] = _course;
 
     nlohmann::json arr;
@@ -173,7 +181,7 @@ nlohmann::json student::to_json() const
     for(auto& pair: _subjects)
     {
         nlohmann::json tmp;
-        tmp["subject"] = pair.first.to_json();
+        tmp["subject"] = (pair.first).to_string();
         tmp["mark"] = pair.second;
 
         arr.push_back(tmp);

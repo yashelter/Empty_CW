@@ -6,6 +6,8 @@ FetchContent_MakeAvailable(json)
 
 find_package(Boost COMPONENTS system thread REQUIRED)
 
+add_subdirectory(tree)
+
 include_directories (${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 find_package(crossguid CONFIG REQUIRED)

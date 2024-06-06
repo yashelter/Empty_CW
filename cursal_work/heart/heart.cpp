@@ -1,16 +1,19 @@
-//
 // Created by Des Caldnd on 6/3/2024.
 //
 
 #include "heart.h"
 #include <iostream>
 #include <unistd.h>
+#include <atomic>
+#include <stop_token>
+#include <httplib.h>
 
 Heart::Heart(const std::string& server_path, uint16_t port, const std::string& controller_type)
-		: server_path_(server_path), port_(port), controller_type_(controller_type), is_running(false)
+		: server_path_(server_path), port_(port), controller_type_(controller_type), is_running(false),
+		  client_("http://127.0.0.1:" + std::to_string(port))
 {
 	url_ = "http://127.0.0.1:" + std::to_string(port);
-	server_process_ = process::launchProcess(server_path, "");
+	server_process_ = process::launchProcess(server_path, std::to_string(port) + " " + controller_type);
 }
 
 Heart::~Heart()
@@ -21,21 +24,6 @@ Heart::~Heart()
 void Heart::start()
 {
 	is_running = true;
-	monitor_thread_ = std::thread(&::Heart::monitor_our_server, this);
-}
-
-void Heart::stop()
-{
-	is_running = false;
-	if (monitor_thread_.joinable()) // тут не уверен правильно ли
-	{
-		monitor_thread_.join();
-	}
-	process::stopProcess(server_process_);
-}
-
-void Heart::monitor_our_server()
-{
 	while (is_running)
 	{
 		if (!check_server())
@@ -46,21 +34,21 @@ void Heart::monitor_our_server()
 	}
 }
 
+void Heart::stop()
+{
+	is_running = false;
+	process::stopProcess(server_process_);
+	std::cout << "Stopping server process";
+}
+
 bool Heart::check_server()
 {
-	httplib::Client _client(url_.c_str());
-	auto res = _client.Get("/heart", {}, httplib::Headers());
-	if (res && res->status == 200)
-	{
-		return true;
-	}
-	return false;
+	return client_.heart();
 }
 
 void Heart::restart_server()
 {
 	std::cout << "Restarting server..." << std::endl;
 	process::stopProcess(server_process_);
-	server_process_ = process::launchProcess(server_path_, "");
+	server_process_ = process::launchProcess(server_path_, std::to_string(port_) + " " + controller_type_);
 }
-

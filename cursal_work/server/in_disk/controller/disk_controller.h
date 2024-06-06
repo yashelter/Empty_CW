@@ -250,7 +250,7 @@ memory_controller<tkey, tvalue, compare, t> disk_controller<tkey, tvalue, compar
 {
     memory_controller<tkey, tvalue, compare, t> mcont(_comparer, al, _logger);
 
-    lock_helper lock(_opened_dirs_files, false, _root, _opened_mutex, _opened_cond_var);
+    lock_helper lock(_opened_dirs_files, false, "", _opened_mutex, _opened_cond_var);
     for(auto& pool : std::filesystem::directory_iterator(_root))
     {
         CW_GUID res = mcont.add_pool(pool.path().filename());

@@ -23,8 +23,10 @@
 
 using namespace std::chrono_literals;
 
-int main(int argc, char* argv[])
+int main()
 {
+    int argc = 3;
+    char* argv[] = {"", "memory", "9030"};
 
 	if (argc < 3) {
 		std::cerr << "Usage: " << argv[0] << " <controller_type> <port>" << std::endl;
@@ -61,7 +63,7 @@ int main(int argc, char* argv[])
 	}
 	else if (strcmp(controller_type, "disk") == 0)
 	{
-		controller = new disk_controller<cw_string, student>("database", logger.get());
+		//controller = new disk_controller<cw_string, student, std::less<cw_string>, 1>("database", logger.get());
 	}
 	else
 	{

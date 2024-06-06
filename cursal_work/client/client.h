@@ -19,12 +19,13 @@ public:
     {
         Async, Waiting
     };
-    ResponseStrategy response_strategy;
+    ResponseStrategy response_strategy = Waiting;
 private:
     mutable httplib::Client _client;
 
     static const std::regex _add_pool_reg;
     static const std::regex _hint_reg;
+    static const std::regex _remove_reg;
     static const std::regex _exit_reg;
     static const std::regex _heart_reg;
 	static const std::regex _all_num_reg;
@@ -67,17 +68,17 @@ private:
     std::optional<std::string> insert(const std::string& pool_name,
                                           const std::string& scheme_name,
                                           const std::string& collection_name,
-                                          const json &student);
+                                          const std::string &student);
 
     std::optional<std::string> update(const std::string& pool_name,
                                       const std::string& scheme_name,
                                       const std::string& collection_name,
-                                      const json &student);
+                                      const std::string &student);
 
     std::optional<std::string> remove(const std::string& pool_name,
                                       const std::string& scheme_name,
                                       const std::string& collection_name,
-                                      const std::string &student);
+                                      const std::string &surname);
 
     std::optional<std::string> read_value(const std::string& pool_name,
                                           const std::string& scheme_name,
@@ -102,10 +103,12 @@ private:
                                 void (*function)(std::ostream&, std::string&));
     static std::string get_new_student(std::istream& cin, std::ostream& cout);
     static void simple_parse(std::ostream& cout, std::string& line);
+    static void parse_message(std::ostream& cout, std::string& line);
+    static void parse_student(std::ostream& cout, std::string& line);
 
 public:
 
-    explicit Client(const std::string& destination="http://127.0.0.1:9300");
+    explicit Client(const std::string& destination="http://127.0.0.1:9030");
 
     void start_dialog(std::istream& cin = std::cin, std::ostream& cout = std::cout);
     bool heart();

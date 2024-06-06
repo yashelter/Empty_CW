@@ -3,7 +3,7 @@
 
 int main()
 {
-    Client client;
+    Client client = Client();
     client.start_dialog();
 
     return 0;
