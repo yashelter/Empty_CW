@@ -269,7 +269,7 @@ std::optional<std::string> Client::read_range(const std::string &pool_name,
 void Client::get_answer_from_server(std::istream& cin, std::ostream& cout, const std::string& guid,
                                     void (*function)(std::ostream&, std::string&))
 {
-    std::cout << guid << std::endl;
+//    std::cout << guid << std::endl;
     if (response_strategy == ResponseStrategy::Waiting)
     {
         auto answer = get(guid);
@@ -317,6 +317,8 @@ std::string Client::get_hint()
     str += "remove {pool name} {scheme_name} {collection name} {surname=key} : removes existing student with given surname\n";
     str += "read_value {pool name} {scheme_name} {collection name} {surname=key} : returns student with given surname\n";
     str += "read_range {pool name} {scheme_name} {collection name} {surname=up_key}  {surname=down_key} : returns students in range with given surname\n";
+
+    str += "heart : checks if server works\n";
 
     str += "exit : stops dialog\n";
     return str;
@@ -457,9 +459,9 @@ void Client::start_dialog(std::istream &cin, std::ostream &cout)
                     cin >> line;
                     time = input_time(line);
 
-                    std::chrono::time_point<std::chrono::system_clock> x = (std::chrono::system_clock::from_time_t(time));
-                    std::cout << time << " " << (std::chrono::system_clock::from_time_t(time) < std::chrono::system_clock::now()) << " ";
-                    std::cout << x << std::endl;
+//                    std::chrono::time_point<std::chrono::system_clock> x = (std::chrono::system_clock::from_time_t(time));
+//                    std::cout << time << " " << (std::chrono::system_clock::from_time_t(time) < std::chrono::system_clock::now()) << " ";
+//                    std::cout << x << std::endl;
 
                 } while (time == 0);
             }

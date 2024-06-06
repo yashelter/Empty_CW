@@ -63,7 +63,7 @@ class controller_int
 {
 public:
 
-    using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
+    using time_point_t = std::chrono::time_point<std::chrono::utc_clock>;
 
     virtual CW_GUID add_pool(std::string pool_name) =0;
     virtual CW_GUID remove_pool(std::string pool_name) =0;

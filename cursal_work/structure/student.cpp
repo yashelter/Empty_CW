@@ -12,17 +12,51 @@ void cw_string::serialize(std::fstream &stream) const
     {
         std::lock_guard lock(file_mut);
 
-        std::fstream real_file(path, std::ios_base::app | std::ios_base::binary | std::ios::out);
+        std::fstream real_file(path, std::ios_base::app | std::ios_base::binary);
 
         if (!real_file.is_open())
             throw std::runtime_error("File for cw_string serialisation could not be opened");
 
         position = real_file.tellg();
 
-        size_t length = size();
+        real_file.seekg(0, std::ios_base::beg);
 
-        real_file.write(reinterpret_cast<char *>(&length), sizeof(size_t));
-        real_file.write(c_str(), length * sizeof(char));
+        bool need_write = true;
+
+        while(real_file.tellg() < position && need_write)
+        {
+            size_t pos = real_file.tellg();
+            size_t length;
+
+            real_file.read(reinterpret_cast<char*>(&length), sizeof(size_t));
+
+            if(length != size())
+            {
+                real_file.seekg(length, std::ios_base::cur);
+                continue;
+            }
+
+            std::string str;
+            str.resize(length);
+
+            real_file.read(str.data(), length * sizeof(char));
+
+            if (*this == str)
+            {
+                need_write = false;
+                position = pos;
+            }
+        }
+
+        real_file.seekg(position);
+
+        if (need_write)
+        {
+            size_t length = size();
+
+            real_file.write(reinterpret_cast<char *>(&length), sizeof(size_t));
+            real_file.write(c_str(), length * sizeof(char));
+        }
     }
 
     stream.write(reinterpret_cast<char *>(&position), sizeof(size_t));

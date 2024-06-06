@@ -475,7 +475,7 @@ bool B_tree<tkey, tvalue, compare, t>::update(const B_tree::tree_data_type &data
     if (exists(*stack.top().first, ind))
     {
         if (hist)
-            _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
+            _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
         (*stack.top().first)->keys[ind].second = data.second;
         return true;
     } else
@@ -490,7 +490,7 @@ bool B_tree<tkey, tvalue, compare, t>::update(B_tree::tree_data_type &&data, boo
     if (exists(*stack.top().first, ind))
     {
         if (hist)
-            _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
+            _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_update_operation((*stack.top().first)->keys[ind]))));
         (*stack.top().first)->keys[ind].second = std::move(data.second);
         return true;
     } else
@@ -647,7 +647,7 @@ typename B_tree<tkey, tvalue, compare, t>::btree_iterator B_tree<tkey, tvalue, c
 {
 //    check_tree(_root, 0);
     if (hist)
-        _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_remove_operation((*path.top().first)->keys[index]))));
+        _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_remove_operation((*path.top().first)->keys[index]))));
 	--_size;
 	if (!is_terminate_node(*path.top().first))
 	{
@@ -835,7 +835,7 @@ typename B_tree<tkey, tvalue, compare, t>::btree_iterator B_tree<tkey, tvalue, c
 
 //    check_tree(_root, 0);
     if (hist)
-        _operations.push(std::make_pair(std::chrono::system_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_insert_operation(unmove(data)))));
+        _operations.push(std::make_pair(std::chrono::utc_clock::now(), std::shared_ptr<b_tree_operation>(new b_tree_insert_operation(unmove(data)))));
 	++_size;
 	if (_root == nullptr)
 	{
