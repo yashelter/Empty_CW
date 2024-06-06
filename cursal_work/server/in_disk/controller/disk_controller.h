@@ -185,7 +185,7 @@ private:
     public:
         std::unordered_map<std::string, std::pair<bool, size_t>>& _map;
         bool _unique;
-        std::string& _path;
+        std::string _path;
         std::mutex& _mut;
         std::condition_variable& _cond_var;
 
@@ -600,11 +600,12 @@ disk_controller<tkey, tvalue, compare, t>::lock_helper::lock_helper(
         return false;
     });
 
+
     auto it = _map.find(_path);
 
     if (it == _map.end())
     {
-        _map.insert(std::make_pair(path, std::make_pair(_unique, 1)));
+        _map.insert(std::make_pair(_path, std::make_pair(_unique, 1)));
     } else
     {
         ++it->second.second;
@@ -1345,6 +1346,8 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::add_scheme(std::string pool_n
         nlohmann::json res;
         res["message"] = fut.get();
 
+        std::cout << "Put " << id;
+
         std::lock_guard lock(_map_mut);
 
         _request_result.insert(std::make_pair(id, res));
@@ -1359,6 +1362,8 @@ std::optional<nlohmann::json> disk_controller<tkey, tvalue, compare, t>::get(CW_
     std::lock_guard lock(_map_mut);
 
     auto it = _request_result.find(id);
+
+    std::cout << "Get " << id << std::endl;
 
     if (it == _request_result.end())
         return {};
@@ -1417,10 +1422,15 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::add_pool(std::string pool_nam
 
     boost::async(boost::launch::async, [this, pool_name]()
     {
+        std::cout << _root << std::endl;
         std::string crutch = "";
         lock_helper lock(_opened_dirs_files, true, crutch, _opened_mutex, _opened_cond_var);
 
+        std::cout << "Root locked " << _root.string() << " pool name " << pool_name << std::endl;
+
         bool res = std::filesystem::create_directory(_root / pool_name);
+
+        std::cout << "Dir added " << res << std::endl;
 
         if (res)
         {
@@ -1451,6 +1461,10 @@ disk_controller<tkey, tvalue, compare, t>::disk_controller(const std::string& pa
     _bucket = std::filesystem::weakly_canonical("./" + path + "_bucket");
 
     std::filesystem::remove_all(_bucket);
+
+    std::filesystem::create_directory(_root);
+    std::filesystem::create_directory(_bucket);
+
 }
 
 
