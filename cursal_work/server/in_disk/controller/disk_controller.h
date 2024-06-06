@@ -713,8 +713,8 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_range(std::string pool_n
             for(; beg != en; ++beg)
             {
                 nlohmann::json tmp;
-                tmp["key"] = beg->first.to_json();
-                tmp["value"] = beg->second.to_json();
+                tmp["key"] = (*beg).first.to_json();
+                tmp["value"] = (*beg).second.to_json();
 
                 k.push_back(tmp);
             }
@@ -769,8 +769,8 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_range(std::string pool_n
             for(; beg != en; ++beg)
             {
                 nlohmann::json tmp;
-                tmp["key"] = beg->first.to_json();
-                tmp["value"] = beg->second.to_json();
+                tmp["key"] = (*beg).first.to_json();
+                tmp["value"] = (*beg).second.to_json();
 
                 k.push_back(tmp);
             }

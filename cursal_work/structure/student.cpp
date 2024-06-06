@@ -3,6 +3,7 @@
 #include <sstream>
 #include <ranges>
 #include <algorithm>
+#include <iostream>
 
 std::mutex cw_string::file_mut;
 
@@ -17,7 +18,11 @@ void cw_string::serialize(std::fstream &stream) const
         if (!real_file.is_open())
             throw std::runtime_error("File for cw_string serialisation could not be opened");
 
+        real_file.seekg(0, std::ios_base::end);
+
         position = real_file.tellg();
+
+        std::cout << "End " << position << std::endl;
 
         real_file.seekg(0, std::ios_base::beg);
 
@@ -59,6 +64,8 @@ void cw_string::serialize(std::fstream &stream) const
         }
     }
 
+    std::cout << "Serialize " << *this << " pos " <<position << std::endl;
+
     stream.write(reinterpret_cast<char *>(&position), sizeof(size_t));
 }
 
@@ -94,6 +101,7 @@ cw_string cw_string::deserialize(std::fstream &stream)
         real_file.read(res.data(), length * sizeof(char));
     }
 
+    std::cout << "Deserialize " << res << " pos " <<position << std::endl;
     return res;
 }
 

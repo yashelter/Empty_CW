@@ -1,3 +1,4 @@
+
 #ifndef B_DISK_TREE_B_TREE_DISK_H
 #define B_DISK_TREE_B_TREE_DISK_H
 
@@ -10,8 +11,10 @@
 #include <initializer_list>
 #include <optional>
 #include <cstddef>
+#include <filesystem>
 
 #include "controller_int.h"
+
 
 
 template <serializable tkey, serializable tvalue, compator<tkey> compare = std::less<tkey>, std::size_t t = 2>
@@ -62,7 +65,7 @@ private:
 
     std::fstream _file_for_key_value;
 
-    btree_disk_node _root;
+//    btree_disk_node _root;
 
 public:
 
@@ -118,8 +121,7 @@ public:
 
         friend class B_tree_disk;
 
-        reference operator*() noexcept;
-        pointer operator->() noexcept;
+        value_type operator*() noexcept;
 
         self& operator++();
         self operator++(int);
@@ -285,7 +287,7 @@ void B_tree_disk<tkey, tvalue, compare, t>::print_root_position() noexcept
     {
         return;
     }
-    _file_for_tree.seekp(sizeof(size_t), std::ios::beg);
+    _file_for_tree.seekg(sizeof(size_t), std::ios::beg);
     _file_for_tree.write(reinterpret_cast<const char*>(&_position_root), sizeof(size_t));
 }
 
@@ -408,7 +410,7 @@ void B_tree_disk<tkey, tvalue, compare, t>::rebalance_node(std::stack<std::pair<
             if (path.size() == 1 && parent.size == 0)
             {
                 path.pop();
-                _root = left;
+//                _root = left;
                 _position_root = left.position_in_disk;
                 print_root_position();
             }
@@ -521,7 +523,7 @@ bool B_tree_disk<tkey, tvalue, compare, t>::insert(const B_tree_disk::tree_data_
 
     if(path.second.second == true)
     {
-        return true;
+        return false;
     }
 
     auto root = disk_read(_position_root);
@@ -532,7 +534,9 @@ bool B_tree_disk<tkey, tvalue, compare, t>::insert(const B_tree_disk::tree_data_
 //        root.keys[0] = std::move(data);
         root.keys.emplace_back(std::move(data));
         root.pointers.emplace_back(size_t(0));
+//        std::cout << _file_for_tree.tellp() << std::endl;
         disk_write(root);
+//        std::cout << _file_for_tree.tellp() << std::endl;
         return true;
     }
 
@@ -542,7 +546,7 @@ bool B_tree_disk<tkey, tvalue, compare, t>::insert(const B_tree_disk::tree_data_
 
     if(found)
     {
-        return true;
+        return false;
     }
 
     insert_array(current_node, 0, data, ind);
@@ -560,6 +564,8 @@ bool B_tree_disk<tkey, tvalue, compare, t>::insert(const B_tree_disk::tree_data_
         }
         split_node(path_path);
     }
+
+//    std::cout << _file_for_tree.tellp() << std::endl;
 
     return true;
 
@@ -601,23 +607,23 @@ void B_tree_disk<tkey, tvalue, compare, t>::split_node(std::stack<std::pair<size
 
         //disk_write(tmp);
 
-        _root = disk_read(_position_root);
+        btree_disk_node root = disk_read(_position_root);
 
-        _root = std::exchange(tmp, _root);
+        root = std::exchange(tmp, root);
 
-        _root.pointers[0] = _position_root;
+        root.pointers[0] = _position_root;
 
-        disk_write(_root);
+        disk_write(root);
 
         disk_write(tmp);
 
-        _position_root = _root.position_in_disk;
+        _position_root = root.position_in_disk;
 
         print_root_position();
 
         path.pop();
 
-        path.push(std::make_pair(_root.position_in_disk, 0));
+        path.push(std::make_pair(root.position_in_disk, 0));
         path.push(std::make_pair(tmp.position_in_disk, size_t(0)));
 
     }
@@ -763,38 +769,28 @@ std::pair<size_t, bool> B_tree_disk<tkey, tvalue, compare, t>::find_index(const 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, std::size_t t>
 void B_tree_disk<tkey, tvalue, compare, t>::btree_disk_node::serialize(std::fstream &stream, std::fstream& stream_for_data) const
 {
-//    std::cout << "Write: " <<stream.tellp() << " " << position_in_disk <<std::endl;
+
+    size_t pos = stream.tellg();
 
     stream.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
 
-    //std::cout<<stream.tellp()<<std::endl;
-
     stream.write(reinterpret_cast<const char*>(&_is_leaf), sizeof(bool));
 
-    //std::cout<<stream.tellp()<<std::endl;
+    stream.write(reinterpret_cast<const char*>(&position_in_disk), sizeof(size_t));;
 
-    stream.write(reinterpret_cast<const char*>(&position_in_disk), sizeof(size_t));
-
-    //std::cout<<stream.tellp()<<std::endl;
-
-    //std::cout << "=====================\n";
-
-    stream_for_data.seekp(0, std::ios_base::end);
+    stream_for_data.seekg(0, std::ios_base::end);
 
     for (size_t i = 0, end = size; i < end; ++i)
     {
 
-        size_t pos_key = stream_for_data.tellp();
-        //std::cout << pos_key << std::endl;
+        size_t pos_key = stream_for_data.tellg();
 
         stream.write(reinterpret_cast<const char*>(&pos_key), sizeof(size_t));
 
         keys[i].first.serialize(stream_for_data);
 
 
-        size_t pos_value = stream_for_data.tellp();
-
-        //std::cout<<pos_value<<std::endl;
+        size_t pos_value = stream_for_data.tellg();
 
         stream.write(reinterpret_cast<const char*>(&pos_value), sizeof(size_t));
 
@@ -809,23 +805,25 @@ void B_tree_disk<tkey, tvalue, compare, t>::btree_disk_node::serialize(std::fstr
         stream.write(reinterpret_cast<const char*>(&ttt), sizeof(size_t));
     }
 
-    //std::cout << "=====================\n";
-
     size_t pointers_size = pointers.size();
-
-    //std::cout<<stream.tellp()<<std::endl;
 
     stream.write(reinterpret_cast<const char*>(&pointers_size), sizeof(size_t));
 
-    //std::cout<<stream.tellp()<<std::endl;
-
-    for (size_t i = 0, end = pointers.size(); i < end; ++i)
+    for (size_t i = 0, end = maximum_keys_in_node + 2; i < end; ++i)
     {
-        stream.write(reinterpret_cast<const char*>(&(pointers[i])), sizeof(size_t));
-        //std::cout<<stream.tellp()<<std::endl;
+        if (i < pointers.size())
+            stream.write(reinterpret_cast<const char*>(&(pointers[i])), sizeof(size_t));
+        else
+        {
+            size_t zero = 0;
+            stream.write(reinterpret_cast<const char*>(&(zero)), sizeof(size_t));
+        }
     }
 
-//    std::cout<<stream.tellp() << " " << position_in_disk <<std::endl;
+    stream.seekg(pos, std::ios_base::beg);
+    size_t test;
+
+    stream.read(reinterpret_cast<char*>(&test), sizeof(size_t));
 }
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, std::size_t t>
@@ -835,11 +833,10 @@ void B_tree_disk<tkey, tvalue, compare, t>::disk_write(btree_disk_node& node)
 
     size_t position_size_t = amount_bytes * node.position_in_disk;
 
-    //auto position = static_cast<std::streampos>(position_size_t);
-    //_file_for_tree.seekp(position);
-    _file_for_tree.seekp(position_size_t);
+    _file_for_tree.seekg(position_size_t, std::ios_base::beg);
 
     node.serialize(_file_for_tree, _file_for_key_value);
+
 
 }
 
@@ -908,6 +905,7 @@ typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_node B_tree_disk<tkey
     size_t moving_in_file = mostly_move * 2*sizeof(size_t);
 
     stream.seekg(moving_in_file, std::ios::cur);
+//    stream.seekp(moving_in_file, std::ios::cur);
 
     //std::cout<<stream.tellg()<<std::endl;
 
@@ -939,7 +937,7 @@ B_tree_disk<tkey, tvalue, compare, t>::btree_disk_node B_tree_disk<tkey, tvalue,
 
     size_t position_size_t = amount_bytes * node_position;
 
-    _file_for_tree.seekg(position_size_t);
+    _file_for_tree.seekg(position_size_t, std::ios_base::beg);
 
     btree_disk_node node = node.deserialize(_file_for_tree, _file_for_key_value);
 
@@ -994,58 +992,199 @@ size_t B_tree_disk<tkey, tvalue, compare, t>::_count_of_node = 0;
 template<serializable tkey, serializable tvalue, compator<tkey> compare, std::size_t t>
 B_tree_disk<tkey, tvalue, compare, t>::B_tree_disk(const std::string& file_path, const compare& cmp, void* logger):  compare(cmp)
 {
+//    std::cout<<"constructor tree start" <<std::endl;
+//
+//    _file_for_tree.clear();
+//    _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
+//    _file_for_tree.close();
+//    _file_for_tree.open(file_path, std::ios::binary | std::ios::in | std::ios::out);
+//
+//    if (!_file_for_tree.is_open()) {
+//        _file_for_tree.clear();
+//        _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
+//        _file_for_tree.close();
+//        _file_for_tree.open(file_path, std::ios::binary | std::ios::in | std::ios::out);
+//
+//    }
+//
+//    if (!_file_for_tree.is_open()) {
+//        throw std::runtime_error("Couldn't open file " + file_path);
+//    }
+//
+//    size_t last_index = file_path.find_last_of('.');
+//    std::string raw_name = file_path.substr(0, last_index);
+//    std::string filename_for_file_key_value = raw_name + "_data.bin";
+//
+//    _file_for_key_value.clear();
+//    _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::out);
+//    _file_for_key_value.close();
+//    _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+//
+//
+//    if (!_file_for_key_value.is_open()) {
+//        _file_for_key_value.clear();
+//        _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::out);
+//        _file_for_key_value.close();
+//        _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+//    }
+//
+//    if (!_file_for_key_value.is_open()) {
+//        throw std::runtime_error("Couldn't open file " + filename_for_file_key_value);
+//    }
+//
+//    _count_of_node = 1;
+//
+//    _root = btree_disk_node(true);
+//
+//    _position_root = 1;
+//
+//    print_root_position();
+//
+//    disk_write(_root);
+//
+//
+//    _file_for_tree.clear();
+//    _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
+//    _file_for_tree.close();
 
 
-    std::cout<<"constructor tree start" <<std::endl;
 
-    _file_for_tree.clear();
-    _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
-    _file_for_tree.close();
-    _file_for_tree.open(file_path, std::ios::binary | std::ios::in | std::ios::out);
+    if(std::filesystem::exists(file_path))
+    {
+        _file_for_tree.open(file_path, std::ios_base::binary | std::ios_base::in |std::ios_base::out);
 
-    if (!_file_for_tree.is_open()) {
+
+        size_t last_index = file_path.find_last_of('.');
+
+        std::string raw_name = file_path.substr(0, last_index);
+
+        std::string filename_for_file_key_value = raw_name + "_data.bin";
+
+        _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+
+
+        _file_for_tree.seekg(sizeof(size_t), std::ios::beg);
+
+        _file_for_tree.read(reinterpret_cast<char*>(&_position_root), sizeof(size_t));
+
+        std::cout << _position_root << std::endl;
+
+        _file_for_tree.seekg(0, std::ios::end);
+
+        size_t last_pos = _file_for_tree.tellg();
+
+        size_t amount_for_one_node = 3 * sizeof(size_t) + sizeof(bool) + (2 * sizeof(size_t)) * (maximum_keys_in_node + 1) + sizeof(size_t) * (maximum_keys_in_node + 2);
+
+        _count_of_node = last_pos / amount_for_one_node;
+
+        if (_count_of_node * amount_for_one_node != last_pos)
+            ++_count_of_node;
+
+    }
+    else
+    {
         _file_for_tree.clear();
         _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
         _file_for_tree.close();
         _file_for_tree.open(file_path, std::ios::binary | std::ios::in | std::ios::out);
 
-    }
+        if (!_file_for_tree.is_open()) {
+            _file_for_tree.clear();
+            _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
+            _file_for_tree.close();
+            _file_for_tree.open(file_path, std::ios::binary | std::ios::in | std::ios::out);
 
-    if (!_file_for_tree.is_open()) {
-        throw std::runtime_error("Couldn't open file " + file_path);
-    }
+        }
 
-    size_t last_index = file_path.find_last_of('.');
-    std::string raw_name = file_path.substr(0, last_index);
-    std::string filename_for_file_key_value = raw_name + "_data.bin";
+        if (!_file_for_tree.is_open()) {
+            throw std::runtime_error("Couldn't open file " + file_path);
+        }
 
-    _file_for_key_value.clear();
-    _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::out);
-    _file_for_key_value.close();
-    _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+        size_t last_index = file_path.find_last_of('.');
+        std::string raw_name = file_path.substr(0, last_index);
+        std::string filename_for_file_key_value = raw_name + "_data.bin";
 
-
-    if (!_file_for_key_value.is_open()) {
         _file_for_key_value.clear();
         _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::out);
         _file_for_key_value.close();
         _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+
+
+        if (!_file_for_key_value.is_open()) {
+            _file_for_key_value.clear();
+            _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::out);
+            _file_for_key_value.close();
+            _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+        }
+
+        if (!_file_for_key_value.is_open()) {
+            throw std::runtime_error("Couldn't open file " + filename_for_file_key_value);
+        }
+
+        _count_of_node = 1;
+
+        btree_disk_node root = btree_disk_node(true);
+
+        _position_root = 1;
+
+        print_root_position();
+
+        disk_write(root);
+
+
+//        _file_for_tree.clear();
+//        _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
+//        _file_for_tree.close();
+
+//        _file_for_tree.clear();
+//        _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
+//        _file_for_tree.close();
+//        _file_for_tree.open(file_path, std::ios::binary | std::ios::in | std::ios::out);
+//
+////        if (!_file_for_tree.is_open()) {
+////            _file_for_tree.clear();
+////            _file_for_tree.open(file_path, std::ios::binary | std::ios::out);
+////            _file_for_tree.close();
+////            _file_for_tree.open(file_path, std::ios::binary | std::ios::in | std::ios::out);
+////        }
+////
+////        if (!_file_for_tree.is_open()) {
+////            throw std::runtime_error("Couldn't open file " + file_path);
+////        }
+//
+//        size_t last_index = file_path.find_last_of('.');
+//        std::string raw_name = file_path.substr(0, last_index);
+//        std::string filename_for_file_key_value = raw_name + "_data.bin";
+//
+////        _file_for_key_value.clear();
+////        _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::out);
+////        _file_for_key_value.close();
+////        _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+//
+//        _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+//
+////        if (!_file_for_key_value.is_open()) {
+////            _file_for_key_value.clear();
+////            _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::out);
+////            _file_for_key_value.close();
+////            _file_for_key_value.open(filename_for_file_key_value, std::ios::binary | std::ios::in | std::ios::out);
+////        }
+////
+////        if (!_file_for_key_value.is_open()) {
+////            throw std::runtime_error("Couldn't open file " + filename_for_file_key_value);
+////        }
+//
+//        _count_of_node = 1;
+//
+//        _root = btree_disk_node(true);
+//
+//        _position_root = 1;
+//
+//        print_root_position();
+//
+//        disk_write(_root);
+
     }
-
-    if (!_file_for_key_value.is_open()) {
-        throw std::runtime_error("Couldn't open file " + filename_for_file_key_value);
-    }
-
-    _count_of_node = 1;
-
-    _root = btree_disk_node(true);
-
-    _position_root = 1;
-
-    print_root_position();
-
-    disk_write(_root);
-
 
 }
 
@@ -1214,7 +1353,7 @@ typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::self&
             _index = node.size;
             node = _tree.disk_read(_path.top().first);
         }
-        --_index;
+        _index = node.size - 1;
     }
 
     return *this;
@@ -1241,17 +1380,10 @@ bool B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::operator!
 }
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, std::size_t t>
-typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::reference B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::operator*() noexcept
+typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::value_type B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::operator*() noexcept
 {
     btree_disk_node node = _tree.disk_read(_path.top().first);
     return *reinterpret_cast<tree_data_type_const*>(&(node.keys[_index]));
-}
-
-template<serializable tkey, serializable tvalue, compator<tkey> compare, std::size_t t>
-typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::pointer B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::operator->() noexcept
-{
-    btree_disk_node node = _tree.disk_read(_path.top().first);
-    return reinterpret_cast<tree_data_type_const*>(&(node.keys[_index]));
 }
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, std::size_t t>
@@ -1303,7 +1435,7 @@ std::pair<typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_itera
     beg._index = in_ind;
 
     auto it_end = end();
-    while (beg != it_end && compare_keys(beg->first, lower))
+    while (beg != it_end && compare_keys((*beg).first, lower))
     {
         ++beg;
     }
@@ -1313,7 +1445,7 @@ std::pair<typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_itera
 
     bool found_one = false;
 
-    if (!compare_keys(lower, beg->first))
+    if (!compare_keys(lower, (*beg).first))
     {
         if (!include_lower)
             ++beg;
@@ -1338,12 +1470,12 @@ std::pair<typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_itera
     }
 
 
-    while (beg != e && e != it_end && compare_keys(upper, e->first))
+    while (beg != e && e != it_end && compare_keys(upper, (*e).first))
     {
         --e;
     }
 
-    if (e != it_end && !compare_keys(e->first, upper))
+    if (e != it_end && !compare_keys((*e).first, upper))
     {
         if (!include_upper)
         {
