@@ -34,6 +34,14 @@ target_link_libraries(
         cw_server
         PUBLIC
         cw_server_lib)
+target_link_libraries(
+        cw_server
+        PUBLIC
+        cw_disk)
+target_link_libraries(
+        cw_server
+        PUBLIC
+        cw_memory)
 set_target_properties(
         cw_server PROPERTIES
         LANGUAGES CXX

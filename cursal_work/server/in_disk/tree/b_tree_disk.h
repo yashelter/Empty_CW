@@ -136,7 +136,7 @@ public:
 
     friend class btree_disk_const_iterator;
 
-    std::optional<tvalue> at(const tkey&) const;//либо пустое, либо tvalue//std::nullopt
+    std::optional<tvalue> at(const tkey&);//либо пустое, либо tvalue//std::nullopt
 
     btree_disk_const_iterator begin();
     btree_disk_const_iterator end() ;
@@ -1255,14 +1255,14 @@ typename B_tree_disk<tkey, tvalue, compare, t>::btree_disk_const_iterator::point
 }
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, std::size_t t>
-std::optional<tvalue> B_tree_disk<tkey, tvalue, compare, t>::at(const tkey & key) const
+std::optional<tvalue> B_tree_disk<tkey, tvalue, compare, t>::at(const tkey & key)
 {
     auto path = find_path(key);
     auto path_path = path.first;
 
     if(path.second.second == false)
     {
-        return std::optional<tkey>();
+        return std::optional<tvalue>();
     }
 
     btree_disk_node current_node = disk_read(path_path.top().first);
@@ -1271,7 +1271,7 @@ std::optional<tvalue> B_tree_disk<tkey, tvalue, compare, t>::at(const tkey & key
 
     if(!found)
     {
-        return std::optional<tkey>();
+        return std::optional<tvalue>();
     }
 
     return current_node.keys[ind].second;

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <memory_controller.h>
+#include <disk_controller.h>
 #include "../structure/student.h"
 
 #include "server.h"
@@ -23,7 +24,7 @@ using namespace std::chrono_literals;
 int main()
 {
     int argc = 3;
-    char* argv[] = {"", "memory", "9030"};
+    char* argv[] = {"", "disk", "9030"};
 
 	if (argc < 3) {
 		std::cerr << "Usage: " << argv[0] << " <controller_type> <port>" << std::endl;
@@ -62,7 +63,7 @@ int main()
 	}
 	else if (strcmp(controller_type, "disk") == 0)
 	{
-		controller = new disk_controller<cw_string, student>("base");
+		controller = new disk_controller<cw_string, student>("base", comparer, logger.get());
 	}
 	else
 	{

@@ -235,7 +235,9 @@ private:
         disk_controller& _d;
         time_point_t _time;
 
-        revert_helper(disk_controller* d, time_point_t time);
+    public:
+
+        revert_helper(disk_controller& d, time_point_t time);
         ~revert_helper();
     };
 
@@ -402,16 +404,16 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 void disk_controller<tkey, tvalue, compare, t>::in_disk_data_insert_operation::undo(
         disk_controller<tkey, tvalue, compare, t> &cont)
 {
-    B_tree_disk<tkey, tvalue, compare, t> tree(cont._root / _pool_name / _scheme_name / (_collection_name + ".dat"), cont._comparer, cont._logger);
+    B_tree_disk<tkey, tvalue, compare, t> tree((cont._root / _pool_name / _scheme_name / (_collection_name + ".dat")).string(), cont._comparer, cont._logger);
 
-    tree.erase(_data);
+    tree.erase(_data.first);
 }
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
 void disk_controller<tkey, tvalue, compare, t>::in_disk_data_insert_operation::redo(
         disk_controller<tkey, tvalue, compare, t> &cont)
 {
-    B_tree_disk<tkey, tvalue, compare, t> tree(cont._root / _pool_name / _scheme_name / (_collection_name + ".dat"), cont._comparer, cont._logger);
+    B_tree_disk<tkey, tvalue, compare, t> tree((cont._root / _pool_name / _scheme_name / (_collection_name + ".dat")).string(), cont._comparer, cont._logger);
 
     tree.insert(_data);
 }
@@ -420,7 +422,7 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 void disk_controller<tkey, tvalue, compare, t>::in_disk_data_update_operation::undo(
         disk_controller<tkey, tvalue, compare, t> &cont)
 {
-    B_tree_disk<tkey, tvalue, compare, t> tree(cont._root / _pool_name / _scheme_name / (_collection_name + ".dat"), cont._comparer, cont._logger);
+    B_tree_disk<tkey, tvalue, compare, t> tree((cont._root / _pool_name / _scheme_name / (_collection_name + ".dat")).string(), cont._comparer, cont._logger);
 
     auto val = tree.at(_data.first);
 
@@ -433,7 +435,7 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 void disk_controller<tkey, tvalue, compare, t>::in_disk_data_update_operation::redo(
         disk_controller<tkey, tvalue, compare, t> &cont)
 {
-    B_tree_disk<tkey, tvalue, compare, t> tree(cont._root / _pool_name / _scheme_name / (_collection_name + ".dat"), cont._comparer, cont._logger);
+    B_tree_disk<tkey, tvalue, compare, t> tree((cont._root / _pool_name / _scheme_name / (_collection_name + ".dat")).string(), cont._comparer, cont._logger);
 
     auto val = tree.at(_data.first);
 
@@ -446,7 +448,7 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 void disk_controller<tkey, tvalue, compare, t>::in_disk_data_remove_operation::undo(
         disk_controller<tkey, tvalue, compare, t> &cont)
 {
-    B_tree_disk<tkey, tvalue, compare, t> tree(cont._root / _pool_name / _scheme_name / (_collection_name + ".dat"), cont._comparer, cont._logger);
+    B_tree_disk<tkey, tvalue, compare, t> tree((cont._root / _pool_name / _scheme_name / (_collection_name + ".dat")).string(), cont._comparer, cont._logger);
 
     tree.insert(_data);
 }
@@ -455,9 +457,9 @@ template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t 
 void disk_controller<tkey, tvalue, compare, t>::in_disk_data_remove_operation::redo(
         disk_controller<tkey, tvalue, compare, t> &cont)
 {
-    B_tree_disk<tkey, tvalue, compare, t> tree(cont._root / _pool_name / _scheme_name / (_collection_name + ".dat"), cont._comparer, cont._logger);
+    B_tree_disk<tkey, tvalue, compare, t> tree((cont._root / _pool_name / _scheme_name / (_collection_name + ".dat")).string(), cont._comparer, cont._logger);
 
-    tree.erase(_data);
+    tree.erase(_data.first);
 }
 
 
@@ -626,7 +628,7 @@ disk_controller<tkey, tvalue, compare, t>::revert_helper::~revert_helper()
 
 
 template<serializable tkey, serializable tvalue, compator<tkey> compare, size_t t>
-disk_controller<tkey, tvalue, compare, t>::revert_helper::revert_helper(disk_controller *d,
+disk_controller<tkey, tvalue, compare, t>::revert_helper::revert_helper(disk_controller &d,
                                                                         disk_controller::time_point_t time) : _d(d), _time(time)
 {
     _d.revert_to(time);
@@ -637,9 +639,9 @@ void disk_controller<tkey, tvalue, compare, t>::redo_all()
 {
     std::lock_guard lock(_history_mut);
 
-    while(!_undone_history.empty)
+    while(!_undone_history.empty())
     {
-        _undone_history.top().second->redo();
+        _undone_history.top().second->redo(*this);
         _history.push(_undone_history.top());
         _undone_history.pop();
     }
@@ -650,9 +652,9 @@ void disk_controller<tkey, tvalue, compare, t>::revert_to(disk_controller::time_
 {
     std::lock_guard lock(_history_mut);
 
-    while(!_history.empty && _history.top().first > time)
+    while(!_history.empty() && _history.top().first > time)
     {
-        _history.top().second->undo();
+        _history.top().second->undo(*this);
         _undone_history.push(_history.top());
         _history.pop();
     }
@@ -694,7 +696,7 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_range(std::string pool_n
                 return res;
             }
 
-            B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+            B_tree_disk<tkey, tvalue, compare, t> tree((_root / pool_name / scheme_name / (collection_name + ".dat")).string(), _comparer, _logger);
 
             if(!tree.is_valid())
             {
@@ -703,15 +705,15 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_range(std::string pool_n
                 return res;
             }
 
-            auto val = tree.find_range(lower, upper);
+            auto [beg, en] = tree.find_range(lower, upper);
 
             nlohmann::json res, k;
 
-            for(auto& pair : val)
+            for(; beg != en; ++beg)
             {
                 nlohmann::json tmp;
-                tmp["key"] = pair.first;
-                tmp["value"] = pair.second;
+                tmp["key"] = beg->first.to_json();
+                tmp["value"] = beg->second.to_json();
 
                 k.push_back(tmp);
             }
@@ -750,7 +752,7 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_range(std::string pool_n
 
             lock_helper clock(_opened_dirs_files, false, pool_name + '/' + scheme_name + '/' + collection_name, _opened_mutex, _opened_cond_var);
 
-            B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+            B_tree_disk<tkey, tvalue, compare, t> tree((_root / pool_name / scheme_name / (collection_name + ".dat")).string(), _comparer, _logger);
 
             if(!tree.is_valid())
             {
@@ -759,15 +761,15 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_range(std::string pool_n
                 return res;
             }
 
-            auto val = tree.find_range(lower, upper);
+            auto [beg, en] = tree.find_range(lower, upper);
 
             nlohmann::json res, k;
 
-            for(auto& pair : val)
+            for(; beg != en; ++beg)
             {
                 nlohmann::json tmp;
-                tmp["key"] = pair.first;
-                tmp["value"] = pair.second;
+                tmp["key"] = beg->first.to_json();
+                tmp["value"] = beg->second.to_json();
 
                 k.push_back(tmp);
             }
@@ -826,7 +828,7 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_value(std::string pool_n
             auto path = (_root / pool_name / scheme_name / (collection_name + ".dat"));
             std::string crutch = path.string();
 
-            B_tree_disk<tkey, tvalue, compare, t> tree(crutch, _logger);
+            B_tree_disk<tkey, tvalue, compare, t> tree(crutch, _comparer, _logger);
 
             if(!tree.is_valid())
             {
@@ -880,7 +882,7 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::read_value(std::string pool_n
 
             lock_helper clock(_opened_dirs_files, false, pool_name + '/' + scheme_name + '/' + collection_name, _opened_mutex, _opened_cond_var);
 
-            B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+            B_tree_disk<tkey, tvalue, compare, t> tree((_root / pool_name / scheme_name / (collection_name + ".dat")).string(), _comparer, _logger);
 
             if(!tree.is_valid())
             {
@@ -951,7 +953,7 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::remove(std::string pool_name,
 
         lock_helper clock(_opened_dirs_files, true, pool_name + '/' + scheme_name + '/' + collection_name, _opened_mutex, _opened_cond_var);
 
-        B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+        B_tree_disk<tkey, tvalue, compare, t> tree((_root / pool_name / scheme_name / (collection_name + ".dat")).string(), _comparer, _logger);
 
         if (!tree.is_valid())
         {
@@ -963,7 +965,7 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::remove(std::string pool_name,
         if(!val)
             return std::string("Data does not exist");
 
-        res = val;
+        res = val.has_value();
 
         if (res)
         {
@@ -1026,7 +1028,7 @@ CW_GUID disk_controller<tkey, tvalue, compare, t>::update(std::string pool_name,
 
         lock_helper clock(_opened_dirs_files, true, pool_name + '/' + scheme_name + '/' + collection_name, _opened_mutex, _opened_cond_var);
 
-        B_tree_disk<tkey, tvalue, compare, t> tree(_root / pool_name / scheme_name / (collection_name + ".dat"), _logger);
+        B_tree_disk<tkey, tvalue, compare, t> tree((_root / pool_name / scheme_name / (collection_name + ".dat")).string(), _comparer, _logger);
 
         if (!tree.is_valid())
         {
