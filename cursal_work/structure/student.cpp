@@ -13,7 +13,15 @@ void cw_string::serialize(std::fstream &stream) const
     {
         std::lock_guard lock(file_mut);
 
-        std::fstream real_file(path, std::ios_base::app | std::ios_base::binary);
+        std::fstream real_file;
+
+        if (!std::filesystem::exists(path))
+        {
+            real_file.open(path, std::ios::out | std::ios::binary);
+            real_file.close();
+        }
+
+        real_file.open(path, std::ios_base::binary | std::ios_base::in | std::ios_base::out);
 
         if (!real_file.is_open())
             throw std::runtime_error("File for cw_string serialisation could not be opened");
@@ -53,7 +61,7 @@ void cw_string::serialize(std::fstream &stream) const
             }
         }
 
-        real_file.seekg(position);
+        real_file.seekg(position, std::ios::beg);
 
         if (need_write)
         {
