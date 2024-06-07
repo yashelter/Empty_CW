@@ -10,7 +10,7 @@ Heart::Heart(const std::string& server_path, uint16_t port, const std::string& c
 		  client_("http://127.0.0.1:" + std::to_string(port))
 {
 	url_ = "http://127.0.0.1:" + std::to_string(port);
-	server_process_ = process::launchProcess(server_path, std::to_string(port) + " " + controller_type);
+	server_process_ = process::launchProcess(server_path, controller_type + " " + std::to_string(port));
 }
 
 Heart::~Heart()
@@ -47,5 +47,5 @@ void Heart::restart_server()
 {
 	std::cout << "Restarting server..." << std::endl;
 	process::stopProcess(server_process_);
-	server_process_ = process::launchProcess(server_path_, std::to_string(port_) + " " + controller_type_);
+	server_process_ = process::launchProcess(server_path_, controller_type_ + " " + std::to_string(port_));
 }

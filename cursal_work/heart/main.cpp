@@ -5,11 +5,11 @@
 #include <string>
 
 
-int main()
+int main(int argc, char* argv[])
 {
-    int argc = 4;
-    char* argv[] = {"", "C:\\Users\\yashelter\\Desktop\\coursework\\cmake-build-debug\\cursal_work\\server\\cw_server.exe",
-                    "memory", "9030"};
+   // int argc = 4;
+    //char* argv[] = {"", "C:\\Users\\yashe\\Desktop\\Empty_CW\\cmake-build-debug\\cursal_work\\server\\cw_server.exe",
+        //            "memory", "9030"};
 
 	if (argc != 4)
 	{

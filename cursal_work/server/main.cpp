@@ -21,10 +21,10 @@
 
 using namespace std::chrono_literals;
 
-int main()
+int main(int argc, char*argv[])
 {
-    int argc = 3;
-    char* argv[] = {"", "disk", "9030"};
+    ///int argc = 3;
+    //char* argv[] = {"", "memory", "9030"};
 
 	if (argc < 3) {
 		std::cerr << "Usage: " << argv[0] << " <controller_type> <port>" << std::endl;
