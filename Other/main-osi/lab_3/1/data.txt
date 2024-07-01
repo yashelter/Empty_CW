@@ -1,0 +1,8 @@
+prior=1 text="Hello World!!"
+prior=1 text="Python "           \"  " is my favorite language!!!..."
+prior=5 text="Where               is my greates tLba’’’ work???"
+prior=2 text=" Yes!                 "
+prior=2 text="No……"
+prior=3 text="2,,,9\9                9\"
+prior=2 text="12,,,4       6"
+prior=1 text="12,,,4 6"

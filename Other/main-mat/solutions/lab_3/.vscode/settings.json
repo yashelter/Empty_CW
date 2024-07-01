@@ -1,0 +1,24 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "algorithm": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "system_error": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "random": "c",
+        "string": "c",
+        "time.h": "c",
+        "deque": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "stdio.h": "c",
+        "memory": "c",
+        "math.h": "c",
+        "string.h": "c"
+    }
+}

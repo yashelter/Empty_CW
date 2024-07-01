@@ -1,0 +1,26 @@
+Load A in.uwu;
+Print                          a all;
+Save A out.uwu;
+Rand A 5 2 7;
+Load B out.uwu;
+               
+                    
+                     
+                         Concat A,           B;   
+                              
+                                Free(B);
+Remove A 1 3; 
+Load C      uwu.uwu;
+Free(a);
+Free(a);
+Rand A 12 -1212 1221;
+Rand b 12 0 1;
+
+                         Concat A,           B;   
+                              
+
+Print                          a all;
+                     Print              b all;
+              
+                     
+                     Print          c all;

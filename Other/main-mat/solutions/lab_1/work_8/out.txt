@@ -1,0 +1,4 @@
+<<< "12345" with min base <6> in <10> CC is : "1865"
+<<< "CFG23" with min base <17> in <10> CC is : "1080608"
+<<< "011" with min base <2> in <10> CC is : "3"
+<<< "0" with min base <2> in <10> CC is : "0"

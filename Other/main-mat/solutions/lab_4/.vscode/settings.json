@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "out": "c",
+        "random": "c",
+        "functional": "c"
+    }
+}

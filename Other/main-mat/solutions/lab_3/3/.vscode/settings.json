@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "typeinfo": "c",
+        "random": "c",
+        "stdio.h": "c"
+    }
+}

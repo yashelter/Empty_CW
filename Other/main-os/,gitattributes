@@ -1,0 +1,2 @@
+* linguist-vendored
+CMakeLists.txt linguist-detectable=false

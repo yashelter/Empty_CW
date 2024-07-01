@@ -1,0 +1,16 @@
+{
+  "based_logger": {
+    "format": "[%s][%tff] %m",
+    "critical": {
+      "console": true,
+      "path": [
+        "out.txt",
+        "out.txt",
+        "a.txt"
+      ]
+    },
+    "debug": {
+      "console": true
+    }
+  }
+}
