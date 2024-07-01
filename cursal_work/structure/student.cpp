@@ -12,7 +12,6 @@ void cw_string::serialize(std::fstream &stream) const
     size_t position;
     {
         std::lock_guard lock(file_mut);
-
         std::fstream real_file;
 
         if (!std::filesystem::exists(path))
