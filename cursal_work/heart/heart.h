@@ -10,7 +10,7 @@ class Heart
 {
 public:
 
-	Heart(const std::string& server_path, uint16_t port, const std::string& controller_type);
+	Heart(const std::string& server_path, const std::string& port, const std::string& controller_type);
 
 	~Heart();
 
@@ -25,7 +25,7 @@ private:
 	void restart_server();
 
 	std::string server_path_;
-	uint16_t port_;
+	std::string port_;
 	std::string controller_type_;
 	std::string url_;
 
